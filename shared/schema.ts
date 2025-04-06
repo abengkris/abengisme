@@ -1,23 +1,42 @@
-import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean, jsonb, varchar, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Users schema (keeping the original for authentication purposes)
+// Users schema (enhanced with more fields)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  email: text("email").notNull().unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  role: text("role").default("user").notNull(),
+  profileImage: text("profile_image"),
+  bio: text("bio"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastLogin: timestamp("last_login"),
+  isActive: boolean("is_active").default(true),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  role: true,
+  profileImage: true,
+  bio: true,
+  isActive: true,
+}).extend({
+  role: z.enum(['user', 'admin', 'editor']).default('user'),
+  isActive: z.boolean().default(true),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
-// Posts schema
+// Posts schema (enhanced)
 export const posts = pgTable("posts", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -29,21 +48,107 @@ export const posts = pgTable("posts", {
   authorId: integer("author_id").notNull(),
   readTime: integer("read_time").notNull(),
   isFeatured: boolean("is_featured").default(false),
+  isPromoted: boolean("is_promoted").default(false), // For sponsored/promoted content
   published: boolean("published").default(true),
+  viewCount: integer("view_count").default(0),
+  likeCount: integer("like_count").default(0),
+  metaTitle: text("meta_title"), // SEO fields
+  metaDescription: text("meta_description"),
+  metaKeywords: text("meta_keywords"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at"),
 });
 
 export const insertPostSchema = createInsertSchema(posts)
-  .omit({ id: true, createdAt: true })
+  .omit({ id: true, createdAt: true, updatedAt: true, viewCount: true, likeCount: true })
   .extend({
     categoryId: z.coerce.number(),
     readTime: z.coerce.number(),
     isFeatured: z.boolean().default(false),
+    isPromoted: z.boolean().default(false),
     published: z.boolean().default(true),
+    metaTitle: z.string().optional(),
+    metaDescription: z.string().optional(),
+    metaKeywords: z.string().optional(),
   });
 
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type Post = typeof posts.$inferSelect;
+
+// Tags schema
+export const tags = pgTable("tags", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertTagSchema = createInsertSchema(tags).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertTag = z.infer<typeof insertTagSchema>;
+export type Tag = typeof tags.$inferSelect;
+
+// Post-Tag relation (many-to-many)
+export const postTags = pgTable("post_tags", {
+  postId: integer("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+  tagId: integer("tag_id").notNull().references(() => tags.id, { onDelete: "cascade" }),
+}, (table) => {
+  return {
+    pk: primaryKey({ columns: [table.postId, table.tagId] }),
+  };
+});
+
+// Comments schema
+export const comments = pgTable("comments", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+  userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
+  parentId: integer("parent_id"), // Will reference self (parent comment) - handled via relations
+  authorName: text("author_name"),
+  authorEmail: text("author_email"),
+  content: text("content").notNull(),
+  isApproved: boolean("is_approved").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCommentSchema = createInsertSchema(comments).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  postId: z.coerce.number(),
+  userId: z.coerce.number().optional(),
+  parentId: z.coerce.number().optional(),
+  isApproved: z.boolean().default(false),
+});
+
+export type InsertComment = z.infer<typeof insertCommentSchema>;
+export type Comment = typeof comments.$inferSelect;
+
+// Ad slots schema
+export const adSlots = pgTable("ad_slots", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  adCode: text("ad_code").notNull(), // Google AdSense code
+  position: text("position").notNull(), // header, sidebar, in-content, etc.
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const insertAdSlotSchema = createInsertSchema(adSlots).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  isActive: z.boolean().default(true),
+});
+
+export type InsertAdSlot = z.infer<typeof insertAdSlotSchema>;
+export type AdSlot = typeof adSlots.$inferSelect;
 
 // Categories schema
 export const categories = pgTable("categories", {
@@ -109,3 +214,141 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
 
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
+
+// User preferences
+export const userPreferences = pgTable("user_preferences", {
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).primaryKey(),
+  theme: text("theme").default("light"), // light, dark, system
+  emailNotifications: boolean("email_notifications").default(true),
+  newsletterSubscribed: boolean("newsletter_subscribed").default(true),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
+  updatedAt: true,
+}).extend({
+  userId: z.coerce.number(),
+});
+
+export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+export type UserPreferences = typeof userPreferences.$inferSelect;
+
+// Social shares
+export const socialShares = pgTable("social_shares", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+  platform: text("platform").notNull(), // facebook, twitter, linkedin, etc.
+  shareCount: integer("share_count").default(0),
+  lastShared: timestamp("last_shared"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertSocialShareSchema = createInsertSchema(socialShares).omit({
+  id: true,
+  shareCount: true,
+  lastShared: true,
+  createdAt: true,
+}).extend({
+  postId: z.coerce.number(),
+});
+
+export type InsertSocialShare = z.infer<typeof insertSocialShareSchema>;
+export type SocialShare = typeof socialShares.$inferSelect;
+
+// Page views analytics
+export const pageViews = pgTable("page_views", {
+  id: serial("id").primaryKey(),
+  path: text("path").notNull(),
+  sessionId: text("session_id"),
+  userId: integer("user_id").references(() => users.id),
+  referrer: text("referrer"),
+  userAgent: text("user_agent"),
+  viewedAt: timestamp("viewed_at").defaultNow().notNull(),
+});
+
+export const insertPageViewSchema = createInsertSchema(pageViews).omit({
+  id: true,
+  viewedAt: true,
+}).extend({
+  userId: z.coerce.number().optional(),
+});
+
+export type InsertPageView = z.infer<typeof insertPageViewSchema>;
+export type PageView = typeof pageViews.$inferSelect;
+
+// Define relations for better type safety and querying
+export const relations = {
+  users: {
+    preferences: {
+      relationName: "userToPreferences",
+      fields: [users.id],
+      references: [userPreferences.userId],
+    },
+    comments: {
+      relationName: "userToComments",
+      fields: [users.id],
+      references: [comments.userId],
+    },
+    pageViews: {
+      relationName: "userToPageViews",
+      fields: [users.id],
+      references: [pageViews.userId],
+    },
+  },
+  posts: {
+    author: {
+      relationName: "postToAuthor",
+      fields: [posts.authorId],
+      references: [authors.id],
+    },
+    category: {
+      relationName: "postToCategory",
+      fields: [posts.categoryId],
+      references: [categories.id],
+    },
+    comments: {
+      relationName: "postToComments",
+      fields: [posts.id],
+      references: [comments.postId],
+    },
+    tags: {
+      relationName: "postToTags",
+      fields: [posts.id],
+      references: [postTags.postId],
+    },
+    socialShares: {
+      relationName: "postToSocialShares",
+      fields: [posts.id],
+      references: [socialShares.postId],
+    }
+  },
+  tags: {
+    posts: {
+      relationName: "tagToPosts",
+      fields: [tags.id],
+      references: [postTags.tagId],
+    }
+  },
+  comments: {
+    post: {
+      relationName: "commentToPost",
+      fields: [comments.postId],
+      references: [posts.id],
+    },
+    user: {
+      relationName: "commentToUser",
+      fields: [comments.userId],
+      references: [users.id],
+    },
+    parentComment: {
+      relationName: "commentToParent",
+      fields: [comments.parentId],
+      references: [comments.id],
+    },
+    childComments: {
+      relationName: "commentToChildren",
+      fields: [comments.id],
+      references: [comments.parentId],
+    }
+  }
+};
