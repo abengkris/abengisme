@@ -85,6 +85,8 @@ const PostCard: React.FC<PostCardProps> = React.memo(({
       </div>
     </article>
   );
-};
+});
+
+export default PostCard;
 
 export default PostCard;
