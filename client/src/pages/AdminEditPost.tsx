@@ -5,7 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
-import { usePostBySlug, updatePost, deletePost, useAllCategories } from '@/lib/api';
+import { updatePost, deletePost, useAllCategories } from '@/lib/api';
+import { useQuery } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -68,8 +69,18 @@ const AdminEditPost: React.FC = () => {
   // Convert ID to number
   const postId = id ? parseInt(id) : 0;
   
-  // Since we don't have a direct getPostById, we'll need to fetch all posts and find by ID
-  const allPostsQuery = useAllCategories();
+  // Fetch post data using React Query
+  const postQuery = useQuery({
+    queryKey: ['post', postId],
+    queryFn: async () => {
+      const response = await fetch(`/api/posts/${postId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch post');
+      }
+      return response.json();
+    },
+    enabled: !!postId,
+  });
   
   // Set up form
   const form = useForm<PostFormValues>({
@@ -88,49 +99,35 @@ const AdminEditPost: React.FC = () => {
     },
   });
   
-  // When posts data is loaded, find the post by ID and populate the form
+  // When post data is loaded, populate the form
   useEffect(() => {
-    const fetchPostData = async () => {
-      try {
-        // For a real implementation, we would use a direct API call to get the post by ID
-        // We're simulating it by making a request to the server
-        const response = await fetch(`/api/posts/${postId}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch post');
-        }
-        
-        const post = await response.json();
-        
-        if (post) {
-          // Populate form with post data
-          form.reset({
-            title: post.title,
-            slug: post.slug,
-            excerpt: post.excerpt,
-            content: post.content,
-            featuredImage: post.featuredImage,
-            categoryId: post.categoryId,
-            authorId: post.authorId,
-            readTime: post.readTime,
-            isFeatured: post.isFeatured,
-            published: post.published,
-          });
-        }
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load post data",
-          variant: "destructive",
-        });
-        navigate('/admin');
-      }
-    };
-    
-    if (postId) {
-      fetchPostData();
+    if (postQuery.data) {
+      form.reset({
+        title: postQuery.data.title,
+        slug: postQuery.data.slug,
+        excerpt: postQuery.data.excerpt,
+        content: postQuery.data.content,
+        featuredImage: postQuery.data.featuredImage,
+        categoryId: postQuery.data.categoryId,
+        authorId: postQuery.data.authorId,
+        readTime: postQuery.data.readTime,
+        isFeatured: postQuery.data.isFeatured,
+        published: postQuery.data.published,
+      });
     }
-  }, [postId, form, navigate, toast]);
+  }, [postQuery.data, form]);
+
+  // Show error state
+  useEffect(() => {
+    if (postQuery.error) {
+      toast({
+        title: "Error",
+        description: "Failed to load post data",
+        variant: "destructive",
+      });
+      navigate('/admin');
+    }
+  }, [postQuery.error, toast, navigate]);
   
   // Handle form submission
   const updateMutation = useMutation({
