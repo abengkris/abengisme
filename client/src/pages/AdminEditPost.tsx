@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
+import ReactMarkdown from 'react-markdown';
 import { usePostBySlug, updatePost, deletePost, useAllCategories } from '@/lib/api';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -62,6 +63,7 @@ const AdminEditPost: React.FC = () => {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const categoriesQuery = useAllCategories();
+  const [isPreview, setIsPreview] = useState(false);
   
   // Convert ID to number
   const postId = id ? parseInt(id) : 0;
@@ -367,13 +369,41 @@ const AdminEditPost: React.FC = () => {
                     name="content"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Content (Markdown)</FormLabel>
+                        <div className="flex items-center justify-between">
+                          <FormLabel>Content (Markdown)</FormLabel>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsPreview(!isPreview)}
+                          >
+                            {isPreview ? 'Edit' : 'Preview'}
+                          </Button>
+                        </div>
                         <FormControl>
-                          <Textarea 
-                            placeholder="# Your post content in markdown format"
-                            rows={15}
-                            {...field}
-                          />
+                          {isPreview ? (
+                            <div className="min-h-[300px] p-4 border rounded-md bg-background">
+                              <ReactMarkdown
+                                components={{
+                                  h1: ({node, ...props}) => <h1 className="text-3xl font-bold font-serif mt-6 mb-4" {...props}/>,
+                                  h2: ({node, ...props}) => <h2 className="text-2xl font-bold font-serif mt-6 mb-3" {...props}/>,
+                                  h3: ({node, ...props}) => <h3 className="text-xl font-bold font-serif mt-5 mb-3" {...props}/>,
+                                  p: ({node, ...props}) => <p className="mb-4 leading-relaxed" {...props}/>,
+                                  ul: ({node, ...props}) => <ul className="ml-6 list-disc mb-4" {...props}/>,
+                                  ol: ({node, ...props}) => <ol className="ml-6 list-decimal mb-4" {...props}/>,
+                                  li: ({node, ...props}) => <li className="mb-2" {...props}/>
+                                }}
+                              >
+                                {field.value}
+                              </ReactMarkdown>
+                            </div>
+                          ) : (
+                            <Textarea 
+                              placeholder="# Your post content in markdown format"
+                              rows={15}
+                              {...field}
+                            />
+                          )}
                         </FormControl>
                         <FormMessage />
                       </FormItem>
