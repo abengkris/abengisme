@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { insertUserSchema } from '@shared/schema';
 import { useAuth } from '@/hooks/use-auth';
+import { PasswordRequirements } from '@/components/PasswordRequirements';
 
 import {
   Form,
@@ -31,8 +32,13 @@ const loginSchema = insertUserSchema.pick({
 const registerSchema = insertUserSchema.pick({
   username: true,
   email: true,
-  password: true,
 }).extend({
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   confirmPassword: z.string(),
 }).refine(
   (values) => values.password === values.confirmPassword,
@@ -301,6 +307,8 @@ const AuthPage = () => {
                                 </div>
                               </FormControl>
                               <FormMessage />
+                              {/* Password requirements component */}
+                              {field.value.length > 0 && <PasswordRequirements password={field.value} />}
                             </FormItem>
                           )}
                         />

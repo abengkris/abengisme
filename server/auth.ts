@@ -41,13 +41,16 @@ export function setupAuth(app: Express) {
       pool,
       tableName: 'session', // Use a standard table name
       createTableIfMissing: true, // Automatically create the session table if it doesn't exist
+      pruneSessionInterval: 60 * 15, // Clean up expired sessions every 15 minutes
     }),
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      path: "/",
     },
+    name: "blog_session", // Custom session name to avoid using default (connect.sid)
   };
 
   app.set("trust proxy", 1);
