@@ -1,21 +1,21 @@
-import { cn } from '@/lib/utils';
-import { 
-  Facebook, 
-  Twitter, 
-  Linkedin, 
-  Mail, 
-  Link2, 
-  MessageCircle 
-} from 'lucide-react';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { 
+import { cn } from "@/lib/utils";
+import {
+  Facebook,
+  Twitter,
+  Linkedin,
+  Mail,
+  Link2,
+  MessageCircle,
+} from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
 
 interface SocialShareButtonsProps {
   url: string;
@@ -28,51 +28,53 @@ interface SocialShareButtonsProps {
 export function SocialShareButtons({
   url,
   title,
-  description = '',
+  description = "",
   vertical = false,
-  className
+  className,
 }: SocialShareButtonsProps) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
-  
+
   // Ensure the URL is absolute
-  const shareUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
-  
+  const shareUrl = url.startsWith("http")
+    ? url
+    : `${window.location.origin}${url}`;
+
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(title);
-  const encodedDescription = encodeURIComponent(description || '');
-  
+  const encodedDescription = encodeURIComponent(description || "");
+
   const shareLinks = [
     {
-      name: 'Facebook',
+      name: "Facebook",
       icon: Facebook,
       url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      color: 'hover:text-blue-600'
+      color: "hover:text-blue-600",
     },
     {
-      name: 'Twitter',
+      name: "Twitter",
       icon: Twitter,
       url: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
-      color: 'hover:text-sky-500'
+      color: "hover:text-sky-500",
     },
     {
-      name: 'LinkedIn',
+      name: "LinkedIn",
       icon: Linkedin,
       url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-      color: 'hover:text-blue-700'
+      color: "hover:text-blue-700",
     },
     {
-      name: 'WhatsApp',
+      name: "WhatsApp",
       icon: MessageCircle,
       url: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`,
-      color: 'hover:text-green-600'
+      color: "hover:text-green-600",
     },
     {
-      name: 'Email',
+      name: "Email",
       icon: Mail,
       url: `mailto:?subject=${encodedTitle}&body=${encodedDescription}%0A%0A${encodedUrl}`,
-      color: 'hover:text-orange-500'
-    }
+      color: "hover:text-orange-500",
+    },
   ];
 
   const copyToClipboard = async () => {
@@ -88,17 +90,19 @@ export function SocialShareButtons({
       toast({
         title: "Copy failed",
         description: "Could not copy the link. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   return (
-    <div className={cn(
-      'flex gap-2',
-      vertical ? 'flex-col' : 'flex-row flex-wrap',
-      className
-    )}>
+    <div
+      className={cn(
+        "flex gap-2",
+        vertical ? "flex-col" : "flex-row flex-wrap",
+        className,
+      )}
+    >
       <TooltipProvider>
         {shareLinks.map((link) => (
           <Tooltip key={link.name}>
@@ -107,9 +111,11 @@ export function SocialShareButtons({
                 variant="outline"
                 size="icon"
                 className="rounded-full"
-                onClick={() => window.open(link.url, '_blank', 'noopener,noreferrer')}
+                onClick={() =>
+                  window.open(link.url, "_blank", "noopener,noreferrer")
+                }
               >
-                <link.icon className={cn('h-4 w-4', link.color)} />
+                <link.icon className={cn("h-4 w-4", link.color)} />
                 <span className="sr-only">Share on {link.name}</span>
               </Button>
             </TooltipTrigger>
@@ -118,7 +124,7 @@ export function SocialShareButtons({
             </TooltipContent>
           </Tooltip>
         ))}
-        
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -127,12 +133,17 @@ export function SocialShareButtons({
               className="rounded-full"
               onClick={copyToClipboard}
             >
-              <Link2 className={cn('h-4 w-4', copied ? 'text-green-500' : 'hover:text-blue-500')} />
+              <Link2
+                className={cn(
+                  "h-4 w-4",
+                  copied ? "text-green-500" : "hover:text-blue-500",
+                )}
+              />
               <span className="sr-only">Copy link</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{copied ? 'Copied!' : 'Copy link'}</p>
+            <p>{copied ? "Copied!" : "Copy link"}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
