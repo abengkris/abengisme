@@ -15,28 +15,28 @@ import { cn } from '@/lib/utils';
 
 const SinglePost: React.FC = () => {
   const { slug } = useParams();
-  
+
   // Fetch post data
   const postQuery = usePostBySlug(slug || '');
   const categoriesQuery = useAllCategories();
   const relatedPostsQuery = useAllPosts();
-  
+
   // Get author info
   const authorQuery = useAuthor(postQuery.data?.authorId || 1);
-  
+
   const isLoading = postQuery.isLoading || categoriesQuery.isLoading || authorQuery.isLoading;
-  
+
   // Get category name
   const getCategoryName = (categoryId: number) => {
     if (!categoriesQuery.data) return '';
     const category = categoriesQuery.data.find(cat => cat.id === categoryId);
     return category?.name || '';
   };
-  
+
   // Get related posts (same category, excluding current post)
   const getRelatedPosts = () => {
     if (!postQuery.data || !relatedPostsQuery.data) return [];
-    
+
     return relatedPostsQuery.data
       .filter(post => 
         post.categoryId === postQuery.data.categoryId && 
@@ -44,7 +44,7 @@ const SinglePost: React.FC = () => {
       )
       .slice(0, 3);
   };
-  
+
   // Render markdown content
   const renderContent = (content: string) => {
     // This is a simple implementation to handle markdown headers, paragraphs,
@@ -63,7 +63,7 @@ const SinglePost: React.FC = () => {
       .replace(/\*(.*)\*/gim, '<em>$1</em>')
       // Paragraphs
       .replace(/^(?!<h|<li|<ul|<ol|<p)(.*$)/gim, '<p class="mb-4 leading-relaxed">$1</p>');
-    
+
     return <div dangerouslySetInnerHTML={{ __html: html }} />;
   };
 
@@ -90,7 +90,7 @@ const SinglePost: React.FC = () => {
           ]}
         />
       )}
-      
+
       <div className="pt-24 pb-16 md:pt-32 md:pb-0">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
@@ -106,7 +106,7 @@ const SinglePost: React.FC = () => {
                   Back to Blog
                 </Link>
               </Button>
-              
+
               {!isLoading && postQuery.data && (
                 <Breadcrumbs 
                   items={[
@@ -119,23 +119,23 @@ const SinglePost: React.FC = () => {
                 />
               )}
             </div>
-            
+
             {isLoading ? (
               // Loading state
               <>
-                <Skeleton className="w-full h-10 mb-4" />
+                <Skeleton className="w-full h-10 mb-4 bg-muted-foreground" />
                 <div className="flex items-center gap-4 mb-6">
-                  <Skeleton className="w-24 h-5" />
-                  <Skeleton className="w-24 h-5" />
-                  <Skeleton className="w-24 h-5" />
+                  <Skeleton className="w-24 h-5 bg-muted-foreground" />
+                  <Skeleton className="w-24 h-5 bg-muted-foreground" />
+                  <Skeleton className="w-24 h-5 bg-muted-foreground" />
                 </div>
-                <Skeleton className="w-full h-80 mb-8" />
+                <Skeleton className="w-full h-80 mb-8 bg-muted-foreground" />
                 <div className="space-y-4">
-                  <Skeleton className="w-full h-6" />
-                  <Skeleton className="w-full h-6" />
-                  <Skeleton className="w-5/6 h-6" />
-                  <Skeleton className="w-full h-6" />
-                  <Skeleton className="w-4/5 h-6" />
+                  <Skeleton className="w-full h-6 bg-muted-foreground" />
+                  <Skeleton className="w-full h-6 bg-muted-foreground" />
+                  <Skeleton className="w-5/6 h-6 bg-muted-foreground" />
+                  <Skeleton className="w-full h-6 bg-muted-foreground" />
+                  <Skeleton className="w-4/5 h-6 bg-muted-foreground" />
                 </div>
               </>
             ) : postQuery.data ? (
@@ -144,7 +144,7 @@ const SinglePost: React.FC = () => {
                 <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
                   {postQuery.data.title}
                 </h1>
-                
+
                 {/* Post Meta */}
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                   <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -164,7 +164,7 @@ const SinglePost: React.FC = () => {
                       <span>{authorQuery.data?.name}</span>
                     </div>
                   </div>
-                  
+
                   {/* Social Share Buttons */}
                   <div className="flex items-center mt-2 sm:mt-0">
                     <SocialShareButtons 
@@ -174,7 +174,7 @@ const SinglePost: React.FC = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Featured Image */}
                 <div className="mb-8">
                   <figure>
@@ -191,7 +191,7 @@ const SinglePost: React.FC = () => {
                     </figcaption>
                   </figure>
                 </div>
-                
+
                 {/* Post Content with optimized ad placement */}
                 <article className="prose prose-lg max-w-none mb-12">
                   {/* We'll use AdContent to insert ads between paragraphs */}
@@ -203,7 +203,7 @@ const SinglePost: React.FC = () => {
                     ))}
                   </AdContent>
                 </article>
-                
+
                 {/* Author Info */}
                 {authorQuery.data && (
                   <div className="flex items-center p-6 bg-secondary rounded-lg mb-12">
@@ -228,7 +228,7 @@ const SinglePost: React.FC = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Article End Share Section */}
                 <div className="flex flex-col items-center text-center mb-12 border-t border-b border-border py-6">
                   <h4 className="font-serif text-lg font-medium mb-3">Share this article</h4>
@@ -253,14 +253,14 @@ const SinglePost: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Related Posts */}
       {!isLoading && postQuery.data && (
         <section className="py-12 md:py-16 bg-secondary">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-5xl mx-auto">
               <h2 className="font-serif text-2xl md:text-3xl font-bold mb-8">Related Posts</h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {getRelatedPosts().length > 0 ? (
                   getRelatedPosts().map(post => (
@@ -286,7 +286,7 @@ const SinglePost: React.FC = () => {
           </div>
         </section>
       )}
-      
+
       {/* Newsletter Section */}
       <section id="subscribe" className="py-12 md:py-16 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -295,7 +295,7 @@ const SinglePost: React.FC = () => {
             <p className="text-muted-foreground mb-8">
               Get thoughtful content on design, technology, and mindful productivity delivered to your inbox. No spam, just ideas worth sharing.
             </p>
-            
+
             <NewsletterForm />
           </div>
         </div>
