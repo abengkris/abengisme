@@ -73,7 +73,7 @@ const AdminEditPost: React.FC = () => {
   const postQuery = useQuery({
     queryKey: ['post', postId],
     queryFn: async () => {
-      const response = await fetch(`/api/posts/${postId}`);
+      const response = await fetch(`/api/posts/id/${postId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch post');
       }

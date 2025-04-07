@@ -102,6 +102,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single post by ID
+  app.get(`${apiRouter}/posts/id/:id`, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+
+      const post = await storage.getPostById(id);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      res.json(post);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch post" });
+    }
+  });
+
   // Get single post by slug
   app.get(`${apiRouter}/posts/:slug`, async (req: Request, res: Response) => {
     try {
