@@ -87,7 +87,7 @@ export function AnalyticsDashboard() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Page Views</CardTitle>
@@ -102,7 +102,7 @@ export function AnalyticsDashboard() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Engagement</CardTitle>
@@ -117,7 +117,7 @@ export function AnalyticsDashboard() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Avg. Session</CardTitle>
@@ -150,7 +150,7 @@ export function AnalyticsDashboard() {
             User Engagement
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="traffic" className="space-y-4">
           <Card>
             <CardHeader>
@@ -165,9 +165,9 @@ export function AnalyticsDashboard() {
                   data={trafficData}
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" className="dark:opacity-20" />
+                  <XAxis dataKey="date" className="dark:text-muted-foreground" />
+                  <YAxis className="dark:text-muted-foreground" />
                   <Tooltip />
                   <Line type="monotone" dataKey="pageViews" stroke="#FF5A5F" activeDot={{ r: 8 }} name="Page Views" />
                   <Line type="monotone" dataKey="visitors" stroke="#4FC3F7" name="Visitors" />
@@ -175,7 +175,7 @@ export function AnalyticsDashboard() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -190,16 +190,16 @@ export function AnalyticsDashboard() {
                     data={trafficData}
                     margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
+                    <CartesianGrid strokeDasharray="3 3" className="dark:opacity-20" />
+                    <XAxis dataKey="date" className="dark:text-muted-foreground" />
+                    <YAxis className="dark:text-muted-foreground" />
                     <Tooltip />
                     <Area type="monotone" dataKey="bounceRate" stroke="#FF8A80" fill="#FF8A80" fillOpacity={0.3} name="Bounce Rate %" />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Recent Page Views</CardTitle>
@@ -225,7 +225,7 @@ export function AnalyticsDashboard() {
             </Card>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="content" className="space-y-4">
           <Card>
             <CardHeader>
@@ -240,9 +240,9 @@ export function AnalyticsDashboard() {
                   data={contentData}
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="postId" />
-                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" className="dark:opacity-20" />
+                  <XAxis dataKey="postId" className="dark:text-muted-foreground" />
+                  <YAxis className="dark:text-muted-foreground" />
                   <Tooltip />
                   <Bar dataKey="views" name="Views">
                     {contentData.map((entry, index) => (
@@ -253,7 +253,7 @@ export function AnalyticsDashboard() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -288,7 +288,7 @@ export function AnalyticsDashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Engagement Score by Content</CardTitle>
@@ -302,9 +302,9 @@ export function AnalyticsDashboard() {
                     data={contentData}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="postId" />
-                    <YAxis />
+                    <CartesianGrid strokeDasharray="3 3" className="dark:opacity-20" />
+                    <XAxis dataKey="postId" className="dark:text-muted-foreground" />
+                    <YAxis className="dark:text-muted-foreground" />
                     <Tooltip />
                     <Bar dataKey="engagementScore" name="Engagement Score">
                       {contentData.map((entry, index) => (
@@ -317,7 +317,7 @@ export function AnalyticsDashboard() {
             </Card>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="engagement" className="space-y-4">
           {/* Add user engagement specific charts here */}
           <Card>
@@ -333,9 +333,9 @@ export function AnalyticsDashboard() {
                   data={trafficData}
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" className="dark:opacity-20" />
+                  <XAxis dataKey="date" className="dark:text-muted-foreground" />
+                  <YAxis className="dark:text-muted-foreground" />
                   <Tooltip />
                   <Line type="monotone" dataKey="visitors" stroke="#FF5A5F" name="Active Users" />
                 </LineChart>
