@@ -1,12 +1,12 @@
 /**
  * Advertisement Configuration
- * 
+ *
  * This file contains settings for controlling ad display throughout the application.
  * Toggle between Google AdSense and manual ads, or disable ads completely.
  */
 
 // Master switch for enabling/disabling all ads throughout the app
-export const ADS_ENABLED = true;
+export const ADS_ENABLED = false;
 
 // Toggle between Google AdSense ads and manual ads
 export const USE_ADSENSE = false; // Set to false to use manual ads instead of Google AdSense
@@ -24,7 +24,7 @@ export const MANUAL_ADS = {
     width: 728,
     height: 90,
   },
-  
+
   // Sidebar ad (displayed in the sidebar)
   SIDEBAR: {
     imagePath: "/images/ads/sidebar-ad.jpg",
@@ -33,7 +33,7 @@ export const MANUAL_ADS = {
     width: 300,
     height: 250,
   },
-  
+
   // In-content ads (displayed between paragraphs)
   IN_CONTENT: [
     {
@@ -49,9 +49,9 @@ export const MANUAL_ADS = {
       linkUrl: "https://example.com/wp-themes",
       width: 580,
       height: 400,
-    }
+    },
   ],
-  
+
   // Footer ad (displayed at the bottom of the page)
   FOOTER: {
     imagePath: "/images/ads/footer-ad.jpg",
@@ -59,7 +59,7 @@ export const MANUAL_ADS = {
     linkUrl: "https://example.com/newsletter",
     width: 970,
     height: 250,
-  }
+  },
 };
 
 // Google AdSense slot IDs (used when USE_ADSENSE is true)
@@ -74,13 +74,13 @@ export const ADSENSE_SLOTS = {
 export const AD_PLACEMENTS = {
   // Minimum number of paragraphs before first in-content ad
   PARAGRAPHS_BEFORE_FIRST_AD: 3,
-  
+
   // Number of paragraphs between ads
   PARAGRAPHS_BETWEEN_ADS: 4,
-  
+
   // Maximum number of ads per page for SEO
   MAX_ADS_PER_PAGE: 3,
-  
+
   // Minimum content length in characters to show ads
   MIN_CONTENT_LENGTH: 500,
 };
