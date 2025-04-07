@@ -14,6 +14,29 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Clock, Calendar, User, ChevronRight, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
+  const [hasError, setHasError] = React.useState(false);
+
+  React.useEffect(() => {
+    // This is a simplified error handler for demonstration purposes.
+    // In a real-world scenario, you might want to use a more robust error handling mechanism.
+    const handleError = (error: Error) => {
+      console.error("Error in ErrorBoundary:", error);
+      setHasError(true);
+    };
+
+    window.addEventListener("error", handleError);
+    return () => window.removeEventListener("error", handleError);
+  }, []);
+
+  if (hasError) {
+    return <div className="text-red-500">Error rendering content</div>;
+  }
+
+  return children;
+};
+
+
 const SinglePost: React.FC = () => {
   const { slug } = useParams();
 
@@ -48,24 +71,29 @@ const SinglePost: React.FC = () => {
 
   // Render markdown content
   const renderContent = (content: string) => {
-    return (
-      <div className="prose prose-lg dark:prose-invert max-w-none">
-        <ReactMarkdown
-          components={{
-            root: ({node, ...props}) => <div className="prose prose-lg dark:prose-invert max-w-none" {...props}/>,
-            h1: ({node, ...props}) => <h1 className="text-3xl font-bold font-serif mt-6 mb-4" {...props}/>,
-            h2: ({node, ...props}) => <h2 className="text-2xl font-bold font-serif mt-6 mb-3" {...props}/>,
-            h3: ({node, ...props}) => <h3 className="text-xl font-bold font-serif mt-5 mb-3" {...props}/>,
-            p: ({node, ...props}) => <p className="mb-4 leading-relaxed" {...props}/>,
-            ul: ({node, ...props}) => <ul className="ml-6 list-disc mb-4" {...props}/>,
-            ol: ({node, ...props}) => <ol className="ml-6 list-decimal mb-4" {...props}/>,
-            li: ({node, ...props}) => <li className="mb-2" {...props}/>
-          }}
-        >
-          {content}
-        </ReactMarkdown>
-      </div>
-    );
+    try {
+      return (
+        <ErrorBoundary fallback={<div className="text-red-500">Error rendering content</div>}>
+          <ReactMarkdown
+            components={{
+              root: ({node, ...props}) => <div className="prose prose-lg dark:prose-invert max-w-none" {...props}/>,
+              h1: ({node, ...props}) => <h1 className="text-3xl font-bold font-serif mt-6 mb-4" {...props}/>,
+              h2: ({node, ...props}) => <h2 className="text-2xl font-bold font-serif mt-6 mb-3" {...props}/>,
+              h3: ({node, ...props}) => <h3 className="text-xl font-bold font-serif mt-5 mb-3" {...props}/>,
+              p: ({node, ...props}) => <p className="mb-4 leading-relaxed" {...props}/>,
+              ul: ({node, ...props}) => <ul className="ml-6 list-disc mb-4" {...props}/>,
+              ol: ({node, ...props}) => <ol className="ml-6 list-decimal mb-4" {...props}/>,
+              li: ({node, ...props}) => <li className="mb-2" {...props}/>
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        </ErrorBoundary>
+      );
+    } catch (error) {
+      console.error("Error rendering Markdown:", error);
+      return <div className="text-red-500">Error rendering content</div>;
+    }
   };
 
   return (

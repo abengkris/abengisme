@@ -37,6 +37,13 @@ export function setupAuth(app: Express) {
     secret: process.env.SESSION_SECRET || (process.env.NODE_ENV === 'production' ? undefined : "dev-session-secret"),
     resave: false,
     saveUninitialized: false,
+    rolling: true,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
     store: new PostgresStore({
       pool,
       tableName: 'session', // Use a standard table name

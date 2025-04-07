@@ -14,7 +14,7 @@ interface PostCardProps {
   createdAt: Date;
 }
 
-const PostCard: React.FC<PostCardProps> = ({
+const PostCard: React.FC<PostCardProps> = React.memo(({
   title,
   slug,
   excerpt,
