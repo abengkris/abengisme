@@ -271,6 +271,7 @@ export const pageViews = pgTable("page_views", {
   city: text("city"),
   device: text("device"),
   browser: text("browser"),
+  metadata: text("metadata"),
   viewedAt: timestamp("viewed_at").defaultNow().notNull(),
 });
 
@@ -284,6 +285,7 @@ export const insertPageViewSchema = createInsertSchema(pageViews).omit({
   city: z.string().optional(),
   device: z.string().optional(),
   browser: z.string().optional(),
+  metadata: z.string().optional(),
 });
 
 export type InsertPageView = z.infer<typeof insertPageViewSchema>;

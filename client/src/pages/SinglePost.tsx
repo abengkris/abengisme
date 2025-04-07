@@ -6,9 +6,10 @@ import SEO from '@/components/SEO';
 import PostCard from '@/components/PostCard';
 import NewsletterForm from '@/components/NewsletterForm';
 import AdContent from '@/components/AdContent';
+import Breadcrumbs, { BreadcrumbItem } from '@/components/Breadcrumbs';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Clock, Calendar, User } from 'lucide-react';
+import { ArrowLeft, Clock, Calendar, User, ChevronRight } from 'lucide-react';
 
 const SinglePost: React.FC = () => {
   const { slug } = useParams();
@@ -69,31 +70,52 @@ const SinglePost: React.FC = () => {
       {/* SEO */}
       {!isLoading && postQuery.data && (
         <SEO 
-          title={postQuery.data.title}
-          description={postQuery.data.excerpt}
+          title={postQuery.data.metaTitle || postQuery.data.title}
+          description={postQuery.data.metaDescription || postQuery.data.excerpt}
           image={postQuery.data.featuredImage}
           type="article"
           publishedTime={new Date(postQuery.data.createdAt).toISOString()}
+          modifiedTime={postQuery.data.updatedAt ? new Date(postQuery.data.updatedAt).toISOString() : undefined}
           author={authorQuery.data?.name}
-          keywords={getCategoryName(postQuery.data.categoryId)}
+          keywords={postQuery.data.metaKeywords || getCategoryName(postQuery.data.categoryId)}
+          readTime={postQuery.data.readTime}
+          category={getCategoryName(postQuery.data.categoryId)}
+          breadcrumbs={[
+            { name: 'Home', url: '/' },
+            { name: 'Blog', url: '/blog' },
+            { name: getCategoryName(postQuery.data.categoryId), url: `/blog?category=${postQuery.data.categoryId}` },
+            { name: postQuery.data.title, url: `/blog/${postQuery.data.slug}` }
+          ]}
         />
       )}
       
       <div className="pt-24 pb-16 md:pt-32 md:pb-0">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
-            {/* Back button */}
-            <div className="mb-8">
+            {/* Back button and Breadcrumbs */}
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <Button 
                 asChild
                 variant="ghost" 
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground mb-4 sm:mb-0"
               >
                 <Link href="/blog" className="flex items-center">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Blog
                 </Link>
               </Button>
+              
+              {!isLoading && postQuery.data && (
+                <Breadcrumbs 
+                  items={[
+                    { name: 'Home', url: '/' },
+                    { name: 'Blog', url: '/blog' },
+                    { name: getCategoryName(postQuery.data.categoryId), url: `/blog?category=${postQuery.data.categoryId}` },
+                    { name: postQuery.data.title, url: `/blog/${postQuery.data.slug}` }
+                  ]}
+                  className="text-sm"
+                />
+              )}
             </div>
             
             {isLoading ? (
@@ -142,11 +164,19 @@ const SinglePost: React.FC = () => {
                 
                 {/* Featured Image */}
                 <div className="mb-8">
-                  <img 
-                    src={postQuery.data.featuredImage} 
-                    alt={postQuery.data.title}
-                    className="w-full h-auto rounded-lg shadow-md"
-                  />
+                  <figure>
+                    <img 
+                      src={postQuery.data.featuredImage} 
+                      alt={postQuery.data.title}
+                      className="w-full h-auto rounded-lg shadow-md"
+                      loading="eager"
+                      width="1200"
+                      height="630"
+                    />
+                    <figcaption className="mt-2 text-sm text-muted-foreground text-center">
+                      Featured image for "{postQuery.data.title}"
+                    </figcaption>
+                  </figure>
                 </div>
                 
                 {/* Post Content with optimized ad placement */}
@@ -166,12 +196,22 @@ const SinglePost: React.FC = () => {
                   <div className="flex items-center p-6 bg-secondary rounded-lg mb-12">
                     <img 
                       src={authorQuery.data.avatar} 
-                      alt={authorQuery.data.name}
+                      alt={`Profile photo of ${authorQuery.data.name}`}
                       className="w-16 h-16 rounded-full mr-4"
+                      loading="lazy"
+                      width="64"
+                      height="64"
                     />
                     <div>
                       <h3 className="font-serif font-bold text-lg mb-1">{authorQuery.data.name}</h3>
-                      <p className="text-muted-foreground text-sm">{authorQuery.data.bio.substring(0, 120)}...</p>
+                      <p className="text-muted-foreground text-sm">{authorQuery.data.bio.substring(0, 120)}...
+                        <Link 
+                          href={`/author/${authorQuery.data.id}`} 
+                          className="text-accent hover:text-accent/80 ml-1 inline-flex items-center"
+                        >
+                          Read more <ChevronRight className="h-3 w-3 ml-1" />
+                        </Link>
+                      </p>
                     </div>
                   </div>
                 )}
