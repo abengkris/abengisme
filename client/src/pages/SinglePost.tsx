@@ -5,6 +5,7 @@ import { usePostBySlug, useAllCategories, useAllPosts, useAuthor } from '@/lib/a
 import SEO from '@/components/SEO';
 import PostCard from '@/components/PostCard';
 import NewsletterForm from '@/components/NewsletterForm';
+import AdContent from '@/components/AdContent';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Clock, Calendar, User } from 'lucide-react';
@@ -148,9 +149,16 @@ const SinglePost: React.FC = () => {
                   />
                 </div>
                 
-                {/* Post Content */}
+                {/* Post Content with optimized ad placement */}
                 <article className="prose prose-lg max-w-none mb-12">
-                  {renderContent(postQuery.data.content)}
+                  {/* We'll use AdContent to insert ads between paragraphs */}
+                  <AdContent containerClassName="space-y-4">
+                    {postQuery.data.content.split('\n\n').map((paragraph, index) => (
+                      <div key={`paragraph-${index}`} className="content-paragraph">
+                        {renderContent(paragraph)}
+                      </div>
+                    ))}
+                  </AdContent>
                 </article>
                 
                 {/* Author Info */}

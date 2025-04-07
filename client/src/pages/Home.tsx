@@ -4,6 +4,7 @@ import SEO from '@/components/SEO';
 import FeaturedPostCard from '@/components/FeaturedPostCard';
 import PostCard from '@/components/PostCard';
 import NewsletterForm from '@/components/NewsletterForm';
+import AdContainer from '@/components/ads/AdContainer';
 import { useFeaturedPosts, useAllPosts, useAllCategories, useAuthor } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -116,6 +117,15 @@ const Home: React.FC = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Ad Banner */}
+      <section className="py-4 border-t border-b border-neutral-100">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-5xl mx-auto">
+            <AdContainer position="header" />
           </div>
         </div>
       </section>

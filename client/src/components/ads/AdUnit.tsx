@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import { ADS_ENABLED, USE_ADSENSE, ADSENSE_CLIENT_ID } from '@/lib/adConfig';
+import { cn } from '@/lib/utils';
 
 interface AdUnitProps {
   adSlot: string;  // The Google AdSense ad slot ID
@@ -7,13 +9,14 @@ interface AdUnitProps {
   className?: string;
   responsive?: boolean;
   adTest?: boolean; // For testing purposes
+  fallbackContent?: React.ReactNode; // Fallback content if AdSense isn't available
 }
 
 /**
  * Google AdSense Ad Unit Component
  * 
- * This component renders a Google AdSense advertisement.
- * Make sure to add the AdSense script to the <head> of your document.
+ * This component renders a Google AdSense advertisement based on configuration.
+ * It handles responsiveness and displays properly in various layouts.
  */
 const AdUnit: React.FC<AdUnitProps> = ({
   adSlot,
@@ -22,8 +25,14 @@ const AdUnit: React.FC<AdUnitProps> = ({
   className = '',
   responsive = true,
   adTest = false,
+  fallbackContent,
 }) => {
   const adRef = useRef<HTMLDivElement>(null);
+  
+  // Don't render if ads are disabled globally or AdSense is disabled
+  if (!ADS_ENABLED || !USE_ADSENSE) {
+    return fallbackContent ? <>{fallbackContent}</> : null;
+  }
   
   useEffect(() => {
     // Wait for AdSense script to load
@@ -47,7 +56,14 @@ const AdUnit: React.FC<AdUnitProps> = ({
             adElement.setAttribute('data-ad-format', adFormat);
           }
           
-          adElement.setAttribute('data-ad-client', import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT_ID || 'ca-pub-xxxxxxxxxxxxxxxx');
+          const clientId = ADSENSE_CLIENT_ID || import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT_ID || '';
+          
+          if (!clientId) {
+            console.warn('AdSense client ID not found. Configure it in adConfig.ts or as an environment variable.');
+            return;
+          }
+          
+          adElement.setAttribute('data-ad-client', clientId);
           adElement.setAttribute('data-ad-slot', adSlot);
           
           // For testing purposes
@@ -60,6 +76,8 @@ const AdUnit: React.FC<AdUnitProps> = ({
           
           // Push command to AdSense queue
           (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } else {
+          console.warn('AdSense script not loaded properly. Check that AdSenseScript component is included in your layout.');
         }
       } catch (error) {
         console.error('Error loading AdSense ad:', error);
@@ -77,17 +95,16 @@ const AdUnit: React.FC<AdUnitProps> = ({
   return (
     <div 
       ref={adRef} 
-      className={`ad-container ${className}`}
-      style={{
-        minHeight: '100px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f9fafb',
-        overflow: 'hidden',
-        ...style
-      }}
-    />
+      className={cn(
+        "adsense-container", 
+        "flex justify-center items-center bg-slate-50/50 overflow-hidden min-h-[100px]",
+        className
+      )}
+      style={style}
+      aria-label="Advertisement"
+    >
+      <span className="text-xs text-gray-400">Advertisement</span>
+    </div>
   );
 };
 
