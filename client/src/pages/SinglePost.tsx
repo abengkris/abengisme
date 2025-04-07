@@ -50,8 +50,8 @@ const SinglePost: React.FC = () => {
   const renderContent = (content: string) => {
     return (
       <ReactMarkdown
-        className="prose prose-lg dark:prose-invert max-w-none"
         components={{
+          root: ({node, ...props}) => <div className="prose prose-lg dark:prose-invert max-w-none" {...props}/>,
           h1: ({node, ...props}) => <h1 className="text-3xl font-bold font-serif mt-6 mb-4" {...props}/>,
           h2: ({node, ...props}) => <h2 className="text-2xl font-bold font-serif mt-6 mb-3" {...props}/>,
           h3: ({node, ...props}) => <h3 className="text-xl font-bold font-serif mt-5 mb-3" {...props}/>,
