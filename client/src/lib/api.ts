@@ -2,7 +2,9 @@ import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import type { 
   Post, Category, Author, 
-  InsertPost, InsertCategory, InsertSubscriber, InsertMessage 
+  InsertPost, InsertCategory, InsertSubscriber, InsertMessage,
+  InsertPageView, InsertTrafficStats, InsertContentPerformance, InsertUserEngagement,
+  PageView, TrafficStats, ContentPerformance, UserEngagement
 } from "@shared/schema";
 
 // Posts
@@ -101,3 +103,88 @@ export interface Message {
   read: boolean;
   createdAt: Date;
 }
+
+// Analytics
+
+// Analytics summary type for the dashboard
+export interface AnalyticsSummary {
+  visitorCount: number;
+  recentPageViews: PageView[];
+  topContent: ContentPerformance[];
+  dailyTraffic: TrafficStats[];
+}
+
+// Analytics - Page Views
+export const recordPageView = async (pageView: InsertPageView) => {
+  const response = await apiRequest("POST", "/api/analytics/page-views", pageView);
+  return response.json();
+};
+
+export const useRecentPageViews = (limit = 100) => {
+  return useQuery<PageView[]>({
+    queryKey: ["/api/analytics/page-views", limit],
+    retry: false,
+  });
+};
+
+export const useVisitorCount = (days = 30) => {
+  return useQuery<{ count: number, days: number }>({
+    queryKey: ["/api/analytics/visitors", days],
+    retry: false,
+  });
+};
+
+// Analytics - Traffic Stats
+export const createTrafficStats = async (stats: InsertTrafficStats) => {
+  const response = await apiRequest("POST", "/api/analytics/traffic", stats);
+  return response.json();
+};
+
+export const useTrafficStats = (periodType: 'daily' | 'weekly' | 'monthly', limit = 30) => {
+  return useQuery<TrafficStats[]>({
+    queryKey: ["/api/analytics/traffic", periodType, limit],
+    retry: false,
+  });
+};
+
+// Analytics - Content Performance
+export const updateContentPerformance = async (data: InsertContentPerformance) => {
+  const response = await apiRequest("POST", "/api/analytics/content-performance", data);
+  return response.json();
+};
+
+export const useContentPerformance = (postId: number) => {
+  return useQuery<ContentPerformance>({
+    queryKey: ["/api/analytics/content-performance", postId],
+    enabled: !!postId,
+    retry: false,
+  });
+};
+
+export const useTopContent = (limit = 10) => {
+  return useQuery<ContentPerformance[]>({
+    queryKey: ["/api/analytics/top-content", limit],
+    retry: false,
+  });
+};
+
+// Analytics - User Engagement
+export const updateUserEngagement = async (data: InsertUserEngagement) => {
+  const response = await apiRequest("POST", "/api/analytics/user-engagement", data);
+  return response.json();
+};
+
+export const useEngagedUsers = (limit = 10) => {
+  return useQuery<UserEngagement[]>({
+    queryKey: ["/api/analytics/engaged-users", limit],
+    retry: false,
+  });
+};
+
+// Analytics - Dashboard Summary
+export const useAnalyticsSummary = () => {
+  return useQuery<AnalyticsSummary>({
+    queryKey: ["/api/analytics/summary"],
+    retry: false,
+  });
+};

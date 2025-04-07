@@ -266,6 +266,11 @@ export const pageViews = pgTable("page_views", {
   userId: integer("user_id").references(() => users.id),
   referrer: text("referrer"),
   userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  country: text("country"),
+  city: text("city"),
+  device: text("device"),
+  browser: text("browser"),
   viewedAt: timestamp("viewed_at").defaultNow().notNull(),
 });
 
@@ -274,10 +279,94 @@ export const insertPageViewSchema = createInsertSchema(pageViews).omit({
   viewedAt: true,
 }).extend({
   userId: z.coerce.number().optional(),
+  ipAddress: z.string().optional(),
+  country: z.string().optional(),
+  city: z.string().optional(),
+  device: z.string().optional(),
+  browser: z.string().optional(),
 });
 
 export type InsertPageView = z.infer<typeof insertPageViewSchema>;
 export type PageView = typeof pageViews.$inferSelect;
+
+// Site traffic analytics by time period
+export const trafficStats = pgTable("traffic_stats", {
+  id: serial("id").primaryKey(),
+  date: timestamp("date").notNull(),
+  visitors: integer("visitors").default(0),
+  pageViews: integer("page_views").default(0),
+  bounceRate: integer("bounce_rate").default(0),
+  avgSessionDuration: integer("avg_session_duration").default(0),
+  periodType: text("period_type").notNull(), // daily, weekly, monthly
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertTrafficStatsSchema = createInsertSchema(trafficStats).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  visitors: z.coerce.number(),
+  pageViews: z.coerce.number(),
+  bounceRate: z.coerce.number(),
+  avgSessionDuration: z.coerce.number(),
+  periodType: z.enum(['daily', 'weekly', 'monthly']),
+});
+
+export type InsertTrafficStats = z.infer<typeof insertTrafficStatsSchema>;
+export type TrafficStats = typeof trafficStats.$inferSelect;
+
+// Content performance analytics
+export const contentPerformance = pgTable("content_performance", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+  views: integer("views").default(0),
+  likes: integer("likes").default(0),
+  shares: integer("shares").default(0),
+  comments: integer("comments").default(0),
+  avgReadTime: integer("avg_read_time").default(0), // In seconds
+  bounceRate: integer("bounce_rate").default(0), // Percentage
+  date: timestamp("date").defaultNow().notNull(),
+});
+
+export const insertContentPerformanceSchema = createInsertSchema(contentPerformance).omit({
+  id: true,
+  date: true,
+}).extend({
+  postId: z.coerce.number(),
+  views: z.coerce.number(),
+  likes: z.coerce.number(),
+  shares: z.coerce.number(),
+  comments: z.coerce.number(),
+  avgReadTime: z.coerce.number(),
+  bounceRate: z.coerce.number(),
+});
+
+export type InsertContentPerformance = z.infer<typeof insertContentPerformanceSchema>;
+export type ContentPerformance = typeof contentPerformance.$inferSelect;
+
+// User engagement analytics
+export const userEngagement = pgTable("user_engagement", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  sessionCount: integer("session_count").default(0),
+  totalTimeSpent: integer("total_time_spent").default(0), // In seconds
+  pagesPerSession: integer("pages_per_session").default(0),
+  lastActive: timestamp("last_active"),
+  date: timestamp("date").defaultNow().notNull(),
+});
+
+export const insertUserEngagementSchema = createInsertSchema(userEngagement).omit({
+  id: true,
+  date: true,
+}).extend({
+  userId: z.coerce.number(),
+  sessionCount: z.coerce.number(),
+  totalTimeSpent: z.coerce.number(),
+  pagesPerSession: z.coerce.number(),
+});
+
+export type InsertUserEngagement = z.infer<typeof insertUserEngagementSchema>;
+export type UserEngagement = typeof userEngagement.$inferSelect;
 
 // Define relations for better type safety and querying
 export const relations = {
@@ -296,6 +385,11 @@ export const relations = {
       relationName: "userToPageViews",
       fields: [users.id],
       references: [pageViews.userId],
+    },
+    engagement: {
+      relationName: "userToEngagement",
+      fields: [users.id],
+      references: [userEngagement.userId],
     },
   },
   posts: {
@@ -323,6 +417,11 @@ export const relations = {
       relationName: "postToSocialShares",
       fields: [posts.id],
       references: [socialShares.postId],
+    },
+    contentPerformance: {
+      relationName: "postToContentPerformance",
+      fields: [posts.id],
+      references: [contentPerformance.postId],
     }
   },
   tags: {
@@ -352,6 +451,20 @@ export const relations = {
       relationName: "commentToChildren",
       fields: [comments.id],
       references: [comments.parentId],
+    }
+  },
+  contentPerformance: {
+    post: {
+      relationName: "contentPerformanceToPost",
+      fields: [contentPerformance.postId],
+      references: [posts.id],
+    }
+  },
+  userEngagement: {
+    user: {
+      relationName: "engagementToUser",
+      fields: [userEngagement.userId],
+      references: [users.id],
     }
   }
 };

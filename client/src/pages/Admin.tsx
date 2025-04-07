@@ -8,9 +8,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatDistanceToNow } from 'date-fns';
-import { Eye, Edit, Trash, File, MessageSquare, ExternalLink, Plus } from 'lucide-react';
+import { Eye, Edit, Trash, File, MessageSquare, ExternalLink, Plus, BarChart, LineChart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/use-auth';
 
 const Admin: React.FC = () => {
   const [, navigate] = useLocation();
@@ -55,21 +56,37 @@ const Admin: React.FC = () => {
     unreadMessages: messagesQuery.data?.filter(msg => !msg.read).length || 0
   };
   
+  const { user } = useAuth();
+  
   return (
     <div className="py-12 md:py-16 mt-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h1 className="font-serif text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
-            <Button 
-              asChild
-              className="bg-accent hover:bg-accent/90 text-white"
-            >
-              <Link href="/">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                View Site
-              </Link>
-            </Button>
+            <div className="flex space-x-3">
+              {user && user.role === 'admin' && (
+                <Button 
+                  asChild
+                  variant="outline"
+                  className="border-accent text-accent hover:bg-accent/10"
+                >
+                  <Link href="/admin/analytics">
+                    <BarChart className="mr-2 h-4 w-4" />
+                    Analytics
+                  </Link>
+                </Button>
+              )}
+              <Button 
+                asChild
+                className="bg-accent hover:bg-accent/90 text-white"
+              >
+                <Link href="/">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  View Site
+                </Link>
+              </Button>
+            </div>
           </div>
           
           {/* Stats Cards */}

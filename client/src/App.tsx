@@ -11,6 +11,7 @@ import SinglePost from "@/pages/SinglePost";
 import Admin from "@/pages/Admin";
 import AdminNewPost from "@/pages/AdminNewPost";
 import AdminEditPost from "@/pages/AdminEditPost";
+import Analytics from "@/pages/Analytics";
 import AuthPage from "@/pages/auth-page";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -39,6 +40,10 @@ function Router() {
       </Route>
       <Route path="/admin/posts/:id/edit">
         {() => user ? <AdminEditPost /> : <AuthPage />}
+      </Route>
+      
+      <Route path="/admin/analytics">
+        {() => user && user.role === 'admin' ? <Analytics /> : <AuthPage />}
       </Route>
       
       <Route component={NotFound} />

@@ -4,10 +4,14 @@ import {
   categories, type Category, type InsertCategory,
   authors, type Author, type InsertAuthor,
   subscribers, type Subscriber, type InsertSubscriber,
-  messages, type Message, type InsertMessage
+  messages, type Message, type InsertMessage,
+  pageViews, type PageView, type InsertPageView,
+  trafficStats, type TrafficStats, type InsertTrafficStats,
+  contentPerformance, type ContentPerformance, type InsertContentPerformance,
+  userEngagement, type UserEngagement, type InsertUserEngagement
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql, gte, count, countDistinct, between, or } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -46,6 +50,28 @@ export interface IStorage {
   getMessageById(id: number): Promise<Message | undefined>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessageAsRead(id: number): Promise<Message | undefined>;
+  
+  // Analytics - Page Views
+  createPageView(pageView: InsertPageView): Promise<PageView>;
+  getPageViewsByPath(path: string): Promise<PageView[]>;
+  getPageViewsByUser(userId: number): Promise<PageView[]>;
+  getRecentPageViews(limit?: number): Promise<PageView[]>;
+  getUniqueVisitorCount(days?: number): Promise<number>;
+  
+  // Analytics - Traffic Stats
+  createOrUpdateTrafficStats(stats: InsertTrafficStats): Promise<TrafficStats>;
+  getTrafficStats(periodType: string, limit?: number): Promise<TrafficStats[]>;
+  getTotalTrafficByPeriod(startDate: Date, endDate: Date): Promise<TrafficStats[]>;
+  
+  // Analytics - Content Performance
+  createOrUpdateContentPerformance(data: InsertContentPerformance): Promise<ContentPerformance>;
+  getContentPerformance(postId: number): Promise<ContentPerformance | undefined>;
+  getTopPerformingContent(limit?: number): Promise<ContentPerformance[]>;
+  
+  // Analytics - User Engagement
+  createOrUpdateUserEngagement(data: InsertUserEngagement): Promise<UserEngagement>;
+  getUserEngagement(userId: number): Promise<UserEngagement | undefined>;
+  getMostEngagedUsers(limit?: number): Promise<UserEngagement[]>;
 }
 
 /**
@@ -216,6 +242,207 @@ export class DatabaseStorage implements IStorage {
       .where(eq(messages.id, id))
       .returning();
     return message || undefined;
+  }
+
+  // Analytics - Page Views
+  async createPageView(insertPageView: InsertPageView): Promise<PageView> {
+    const [pageView] = await db
+      .insert(pageViews)
+      .values(insertPageView)
+      .returning();
+    return pageView;
+  }
+
+  async getPageViewsByPath(path: string): Promise<PageView[]> {
+    return await db
+      .select()
+      .from(pageViews)
+      .where(eq(pageViews.path, path))
+      .orderBy(desc(pageViews.viewedAt));
+  }
+
+  async getPageViewsByUser(userId: number): Promise<PageView[]> {
+    return await db
+      .select()
+      .from(pageViews)
+      .where(eq(pageViews.userId, userId))
+      .orderBy(desc(pageViews.viewedAt));
+  }
+
+  async getRecentPageViews(limit: number = 100): Promise<PageView[]> {
+    return await db
+      .select()
+      .from(pageViews)
+      .orderBy(desc(pageViews.viewedAt))
+      .limit(limit);
+  }
+
+  async getUniqueVisitorCount(days: number = 30): Promise<number> {
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+    
+    const [result] = await db
+      .select({ count: countDistinct(pageViews.sessionId) })
+      .from(pageViews)
+      .where(gte(pageViews.viewedAt, date));
+    
+    return result?.count || 0;
+  }
+
+  // Analytics - Traffic Stats
+  async createOrUpdateTrafficStats(insertStats: InsertTrafficStats): Promise<TrafficStats> {
+    // First check if we already have stats for this date and period type
+    const existingStats = await db
+      .select()
+      .from(trafficStats)
+      .where(
+        and(
+          eq(trafficStats.date, insertStats.date),
+          eq(trafficStats.periodType, insertStats.periodType)
+        )
+      );
+
+    if (existingStats.length > 0) {
+      // Update existing stats
+      const [stats] = await db
+        .update(trafficStats)
+        .set(insertStats)
+        .where(eq(trafficStats.id, existingStats[0].id))
+        .returning();
+      return stats;
+    } else {
+      // Create new stats
+      const [stats] = await db
+        .insert(trafficStats)
+        .values(insertStats)
+        .returning();
+      return stats;
+    }
+  }
+
+  async getTrafficStats(periodType: string, limit: number = 30): Promise<TrafficStats[]> {
+    return await db
+      .select()
+      .from(trafficStats)
+      .where(eq(trafficStats.periodType, periodType))
+      .orderBy(desc(trafficStats.date))
+      .limit(limit);
+  }
+
+  async getTotalTrafficByPeriod(startDate: Date, endDate: Date): Promise<TrafficStats[]> {
+    return await db
+      .select()
+      .from(trafficStats)
+      .where(
+        between(trafficStats.date, startDate, endDate)
+      )
+      .orderBy(trafficStats.date);
+  }
+
+  // Analytics - Content Performance
+  async createOrUpdateContentPerformance(insertData: InsertContentPerformance): Promise<ContentPerformance> {
+    // Check if we already have performance data for this post today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const existingData = await db
+      .select()
+      .from(contentPerformance)
+      .where(
+        and(
+          eq(contentPerformance.postId, insertData.postId),
+          gte(contentPerformance.date, today)
+        )
+      );
+
+    if (existingData.length > 0) {
+      // Update existing record
+      const [data] = await db
+        .update(contentPerformance)
+        .set(insertData)
+        .where(eq(contentPerformance.id, existingData[0].id))
+        .returning();
+      return data;
+    } else {
+      // Create new record
+      const [data] = await db
+        .insert(contentPerformance)
+        .values(insertData)
+        .returning();
+      return data;
+    }
+  }
+
+  async getContentPerformance(postId: number): Promise<ContentPerformance | undefined> {
+    const [data] = await db
+      .select()
+      .from(contentPerformance)
+      .where(eq(contentPerformance.postId, postId))
+      .orderBy(desc(contentPerformance.date))
+      .limit(1);
+    
+    return data || undefined;
+  }
+
+  async getTopPerformingContent(limit: number = 10): Promise<ContentPerformance[]> {
+    return await db
+      .select()
+      .from(contentPerformance)
+      .orderBy(desc(contentPerformance.views))
+      .limit(limit);
+  }
+
+  // Analytics - User Engagement
+  async createOrUpdateUserEngagement(insertData: InsertUserEngagement): Promise<UserEngagement> {
+    // Check if we already have engagement data for this user today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const existingData = await db
+      .select()
+      .from(userEngagement)
+      .where(
+        and(
+          eq(userEngagement.userId, insertData.userId),
+          gte(userEngagement.date, today)
+        )
+      );
+
+    if (existingData.length > 0) {
+      // Update existing record
+      const [data] = await db
+        .update(userEngagement)
+        .set(insertData)
+        .where(eq(userEngagement.id, existingData[0].id))
+        .returning();
+      return data;
+    } else {
+      // Create new record
+      const [data] = await db
+        .insert(userEngagement)
+        .values(insertData)
+        .returning();
+      return data;
+    }
+  }
+
+  async getUserEngagement(userId: number): Promise<UserEngagement | undefined> {
+    const [data] = await db
+      .select()
+      .from(userEngagement)
+      .where(eq(userEngagement.userId, userId))
+      .orderBy(desc(userEngagement.date))
+      .limit(1);
+    
+    return data || undefined;
+  }
+
+  async getMostEngagedUsers(limit: number = 10): Promise<UserEngagement[]> {
+    return await db
+      .select()
+      .from(userEngagement)
+      .orderBy(desc(userEngagement.totalTimeSpent))
+      .limit(limit);
   }
 }
 

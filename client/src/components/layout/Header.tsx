@@ -11,7 +11,9 @@ import {
   Home,
   BookOpen,
   Info,
-  MessageSquare
+  MessageSquare,
+  BarChart,
+  LayoutDashboard
 } from 'lucide-react';
 
 import {
@@ -114,6 +116,26 @@ const Header: React.FC = () => {
                     <UserCheck className="w-4 h-4 mr-2" />
                     {isPremium ? 'Premium Active' : 'Upgrade to Premium'}
                   </DropdownMenuItem>
+                  
+                  {user && user.role === 'admin' && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Admin</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin">
+                          <LayoutDashboard className="w-4 h-4 mr-2" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/analytics">
+                          <BarChart className="w-4 h-4 mr-2" />
+                          Analytics
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
                     <LogOut className="w-4 h-4 mr-2" />
@@ -150,6 +172,26 @@ const Header: React.FC = () => {
                     <UserCheck className="w-4 h-4 mr-2" />
                     {isPremium ? 'Premium Active' : 'Upgrade to Premium'}
                   </DropdownMenuItem>
+                  
+                  {user && user.role === 'admin' && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Admin</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin">
+                          <LayoutDashboard className="w-4 h-4 mr-2" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/analytics">
+                          <BarChart className="w-4 h-4 mr-2" />
+                          Analytics
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
                     <LogOut className="w-4 h-4 mr-2" /> 
@@ -196,6 +238,22 @@ const Header: React.FC = () => {
                 <MessageSquare className="w-5 h-5 mr-3" />
                 Contact
               </Link>
+              
+              {/* Admin links in mobile menu */}
+              {user && user.role === 'admin' && (
+                <>
+                  <div className="h-px bg-neutral-200 mx-5 my-2" />
+                  <h4 className="text-xs uppercase text-muted-foreground px-6 pt-2 pb-1">Admin</h4>
+                  <Link href="/admin" className={`flex items-center px-6 py-3 hover:bg-slate-50 transition-colors ${isActive('/admin') && !isActive('/admin/analytics') ? 'text-accent font-medium' : 'text-primary'}`}>
+                    <LayoutDashboard className="w-5 h-5 mr-3" />
+                    Dashboard
+                  </Link>
+                  <Link href="/admin/analytics" className={`flex items-center px-6 py-3 hover:bg-slate-50 transition-colors ${isActive('/admin/analytics') ? 'text-accent font-medium' : 'text-primary'}`}>
+                    <BarChart className="w-5 h-5 mr-3" />
+                    Analytics
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

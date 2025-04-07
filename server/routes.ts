@@ -1,7 +1,16 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPostSchema, insertCategorySchema, insertSubscriberSchema, insertMessageSchema } from "@shared/schema";
+import { 
+  insertPostSchema, 
+  insertCategorySchema, 
+  insertSubscriberSchema, 
+  insertMessageSchema,
+  insertPageViewSchema,
+  insertTrafficStatsSchema,
+  insertContentPerformanceSchema,
+  insertUserEngagementSchema
+} from "@shared/schema";
 import { z } from "zod";
 import { setupAuth } from "./auth";
 
@@ -219,6 +228,198 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedMessage);
     } catch (error) {
       res.status(500).json({ message: "Failed to mark message as read" });
+    }
+  });
+  
+  // Analytics routes - require authentication
+  const adminGuard = (req: Request, res: Response, next: Function) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden - Admin access required" });
+    }
+    
+    next();
+  };
+  
+  // Analytics - Page Views
+  app.post(`${apiRouter}/analytics/page-views`, async (req: Request, res: Response) => {
+    try {
+      const pageViewData = insertPageViewSchema.parse(req.body);
+      // Add user ID if authenticated
+      if (req.isAuthenticated() && req.user) {
+        pageViewData.userId = req.user.id;
+      }
+      
+      // Add session ID if not provided
+      if (!pageViewData.sessionId) {
+        pageViewData.sessionId = req.sessionID;
+      }
+      
+      // Extract device/browser info from user agent
+      if (req.headers['user-agent']) {
+        pageViewData.userAgent = req.headers['user-agent'];
+      }
+      
+      const pageView = await storage.createPageView(pageViewData);
+      res.status(201).json(pageView);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid page view data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to record page view" });
+    }
+  });
+  
+  // Get recent page views (admin only)
+  app.get(`${apiRouter}/analytics/page-views`, adminGuard, async (req: Request, res: Response) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+      const pageViews = await storage.getRecentPageViews(limit);
+      res.json(pageViews);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch page views" });
+    }
+  });
+  
+  // Get unique visitor count
+  app.get(`${apiRouter}/analytics/visitors`, adminGuard, async (req: Request, res: Response) => {
+    try {
+      const days = req.query.days ? parseInt(req.query.days as string) : 30;
+      const count = await storage.getUniqueVisitorCount(days);
+      res.json({ count, days });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch visitor count" });
+    }
+  });
+  
+  // Traffic Stats
+  app.post(`${apiRouter}/analytics/traffic`, adminGuard, async (req: Request, res: Response) => {
+    try {
+      const trafficData = insertTrafficStatsSchema.parse(req.body);
+      const trafficStats = await storage.createOrUpdateTrafficStats(trafficData);
+      res.status(201).json(trafficStats);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid traffic data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to record traffic stats" });
+    }
+  });
+  
+  // Get traffic stats by period
+  app.get(`${apiRouter}/analytics/traffic/:periodType`, adminGuard, async (req: Request, res: Response) => {
+    try {
+      const periodType = req.params.periodType;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 30;
+      
+      if (!['daily', 'weekly', 'monthly'].includes(periodType)) {
+        return res.status(400).json({ message: "Invalid period type" });
+      }
+      
+      const trafficStats = await storage.getTrafficStats(periodType, limit);
+      res.json(trafficStats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch traffic stats" });
+    }
+  });
+  
+  // Content Performance
+  app.post(`${apiRouter}/analytics/content-performance`, adminGuard, async (req: Request, res: Response) => {
+    try {
+      const performanceData = insertContentPerformanceSchema.parse(req.body);
+      const contentPerformance = await storage.createOrUpdateContentPerformance(performanceData);
+      res.status(201).json(contentPerformance);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid content performance data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to record content performance" });
+    }
+  });
+  
+  // Get content performance for a specific post
+  app.get(`${apiRouter}/analytics/content-performance/:postId`, adminGuard, async (req: Request, res: Response) => {
+    try {
+      const postId = parseInt(req.params.postId);
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      const performance = await storage.getContentPerformance(postId);
+      
+      if (!performance) {
+        return res.status(404).json({ message: "Content performance data not found" });
+      }
+      
+      res.json(performance);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch content performance" });
+    }
+  });
+  
+  // Get top performing content
+  app.get(`${apiRouter}/analytics/top-content`, adminGuard, async (req: Request, res: Response) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const topContent = await storage.getTopPerformingContent(limit);
+      res.json(topContent);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch top performing content" });
+    }
+  });
+  
+  // User Engagement
+  app.post(`${apiRouter}/analytics/user-engagement`, async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const engagementData = insertUserEngagementSchema.parse(req.body);
+      // Ensure user ID matches authenticated user
+      engagementData.userId = req.user.id;
+      
+      const engagement = await storage.createOrUpdateUserEngagement(engagementData);
+      res.status(201).json(engagement);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid engagement data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to record user engagement" });
+    }
+  });
+  
+  // Get most engaged users (admin only)
+  app.get(`${apiRouter}/analytics/engaged-users`, adminGuard, async (req: Request, res: Response) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const engagedUsers = await storage.getMostEngagedUsers(limit);
+      res.json(engagedUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch engaged users" });
+    }
+  });
+  
+  // Analytics Dashboard Summary
+  app.get(`${apiRouter}/analytics/summary`, adminGuard, async (req: Request, res: Response) => {
+    try {
+      // Get key metrics for dashboard
+      const visitorCount = await storage.getUniqueVisitorCount(30);
+      const recentPageViews = await storage.getRecentPageViews(10);
+      const topContent = await storage.getTopPerformingContent(5);
+      const dailyTraffic = await storage.getTrafficStats('daily', 7);
+      
+      res.json({
+        visitorCount,
+        recentPageViews,
+        topContent,
+        dailyTraffic
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch analytics summary" });
     }
   });
 
