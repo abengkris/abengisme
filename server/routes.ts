@@ -257,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all messages (for CMS)
-  app.get(`${apiRouter}/messages`, async (_req: Request, res: Response) => {
+  app.get(`${apiRouter}/messages`, adminGuard, async (_req: Request, res: Response) => {
     try {
       const messages = await storage.getAllMessages();
       res.json(messages);

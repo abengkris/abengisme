@@ -156,7 +156,10 @@ export const sendContactMessage = async (message: InsertMessage) => {
 export const useAllMessages = () => {
   return useQuery<Message[]>({
     queryKey: ["/api/messages"],
-    queryFn: () => api.get("/api/messages")
+    queryFn: () => api.get("/api/messages"),
+    retry: false,
+    // Only fetch if user is authenticated
+    enabled: !!localStorage.getItem('isAuthenticated')
   });
 };
 
