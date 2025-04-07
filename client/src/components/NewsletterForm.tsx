@@ -59,10 +59,7 @@ const NewsletterForm: React.FC = () => {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="max-w-md mx-auto bg-background"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-md mx-auto">
         <div className="flex flex-col sm:flex-row gap-3">
           <FormField
             control={form.control}
