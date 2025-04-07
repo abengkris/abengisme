@@ -24,10 +24,10 @@ const PostCard: React.FC<PostCardProps> = ({
   createdAt
 }) => {
   return (
-    <article className="relative group flex flex-col overflow-hidden transition-all duration-300 bg-white rounded-2xl shadow-sm hover:shadow-xl border border-neutral-100">
+    <article className="relative group flex flex-col overflow-hidden transition-all duration-300 bg-card rounded-2xl shadow-sm hover:shadow-xl border border-border">
       {/* Category Badge */}
       <div className="absolute top-4 left-4 z-10">
-        <span className="inline-block px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-accent rounded-full shadow-sm">
+        <span className="inline-block px-3 py-1 bg-background/90 backdrop-blur-sm text-xs font-medium text-accent rounded-full shadow-sm">
           {categoryName}
         </span>
       </div>
@@ -61,7 +61,7 @@ const PostCard: React.FC<PostCardProps> = ({
         </p>
         
         {/* Footer Metadata */}
-        <div className="flex items-center justify-between pt-4 border-t border-neutral-100 text-xs text-muted-foreground">
+        <div className="flex items-center justify-between pt-4 border-t border-border text-xs text-muted-foreground">
           <div className="flex items-center">
             <Clock className="w-3.5 h-3.5 mr-1.5" />
             <span>{readTime} min read</span>
