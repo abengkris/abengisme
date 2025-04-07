@@ -1,3 +1,4 @@
+
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import path from "path";
@@ -22,9 +23,22 @@ const authLimiter = rateLimit({
   max: 5 // limit each IP to 5 requests per windowMs
 });
 
+// Define adminGuard middleware at the top
+const adminGuard = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Forbidden - Admin access required" });
+  }
+
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes with rate limiting
-  setupAuth(app, authLimiter); // Assuming setupAuth accepts the limiter as an argument
+  setupAuth(app, authLimiter);
 
   // SEO-related routes
   app.get('/sitemap.xml', (_req: Request, res: Response) => {
@@ -286,20 +300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Analytics routes - require authentication
-  const adminGuard = (req: Request, res: Response, next: Function) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ message: "Forbidden - Admin access required" });
-    }
-
-    next();
-  };
-
-  // Analytics - Page Views
+  // Analytics routes
   app.post(`${apiRouter}/analytics/page-views`, async (req: Request, res: Response) => {
     try {
       const pageViewData = insertPageViewSchema.parse(req.body);
