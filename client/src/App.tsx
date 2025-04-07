@@ -11,12 +11,16 @@ import SinglePost from "@/pages/SinglePost";
 import Admin from "@/pages/Admin";
 import AdminNewPost from "@/pages/AdminNewPost";
 import AdminEditPost from "@/pages/AdminEditPost";
+import AuthPage from "@/pages/auth-page";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AdSenseScript from "@/components/ads/AdSenseScript";
 import { AuthProvider } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 
 function Router() {
+  const { user } = useAuth();
+  
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -24,9 +28,19 @@ function Router() {
       <Route path="/blog/:slug" component={SinglePost} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
-      <Route path="/admin" component={Admin} />
-      <Route path="/admin/posts/new" component={AdminNewPost} />
-      <Route path="/admin/posts/:id/edit" component={AdminEditPost} />
+      <Route path="/auth" component={AuthPage} />
+      
+      {/* Protected Admin Routes */}
+      <Route path="/admin">
+        {() => user ? <Admin /> : <AuthPage />}
+      </Route>
+      <Route path="/admin/posts/new">
+        {() => user ? <AdminNewPost /> : <AuthPage />}
+      </Route>
+      <Route path="/admin/posts/:id/edit">
+        {() => user ? <AdminEditPost /> : <AuthPage />}
+      </Route>
+      
       <Route component={NotFound} />
     </Switch>
   );
