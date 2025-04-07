@@ -1,10 +1,23 @@
 import React from 'react';
 import { Link } from 'wouter';
 import AdContainer from '@/components/ads/AdContainer';
+import { cn } from '@/lib/utils';
+import { useScrollEffect } from '@/hooks/use-scroll-effect';
 
 const Footer: React.FC = () => {
+  // Use the same scroll effect for consistency with header and bottom nav
+  const { visible } = useScrollEffect({
+    hideOnScrollDown: true,
+    threshold: 50,
+    alwaysShowAtTop: true
+  });
+  
   return (
-    <footer className="bg-white border-t border-neutral-200 py-8">
+    <footer className={cn(
+      "bg-white border-t border-neutral-200 py-8",
+      "md:pb-8", // Default padding on desktop
+      visible ? "pb-8" : "pb-24" // Dynamic padding based on mobile nav visibility
+    )}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">

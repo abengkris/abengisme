@@ -15,6 +15,7 @@ import Analytics from "@/pages/Analytics";
 import AuthPage from "@/pages/auth-page";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import AdSenseScript from "@/components/ads/AdSenseScript";
 import { AuthProvider } from "@/hooks/use-auth";
 import { useAuth } from "@/hooks/use-auth";
@@ -63,10 +64,11 @@ function App() {
         
         <div className="flex flex-col min-h-screen">
           <Header />
-          <main className="flex-grow">
+          <main className="flex-grow pb-16 md:pb-0">
             <Router />
           </main>
           <Footer />
+          <MobileBottomNav />
         </div>
         <Toaster />
       </AuthProvider>

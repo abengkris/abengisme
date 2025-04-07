@@ -7,9 +7,11 @@ import PostCard from '@/components/PostCard';
 import NewsletterForm from '@/components/NewsletterForm';
 import AdContent from '@/components/AdContent';
 import Breadcrumbs, { BreadcrumbItem } from '@/components/Breadcrumbs';
+import { SocialShareButtons } from '@/components/SocialShareButtons';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Clock, Calendar, User, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Clock, Calendar, User, ChevronRight, Share2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const SinglePost: React.FC = () => {
   const { slug } = useParams();
@@ -144,21 +146,32 @@ const SinglePost: React.FC = () => {
                 </h1>
                 
                 {/* Post Meta */}
-                <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-muted-foreground">
-                  <span className="bg-accent/10 text-accent px-3 py-1 rounded-full font-medium">
-                    {getCategoryName(postQuery.data.categoryId)}
-                  </span>
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-1" />
-                    <span>{postQuery.data.readTime} min read</span>
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                    <span className="bg-accent/10 text-accent px-3 py-1 rounded-full font-medium">
+                      {getCategoryName(postQuery.data.categoryId)}
+                    </span>
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      <span>{postQuery.data.readTime} min read</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      <span>{formatDistanceToNow(new Date(postQuery.data.createdAt), { addSuffix: true })}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <User className="h-4 w-4 mr-1" />
+                      <span>{authorQuery.data?.name}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    <span>{formatDistanceToNow(new Date(postQuery.data.createdAt), { addSuffix: true })}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <User className="h-4 w-4 mr-1" />
-                    <span>{authorQuery.data?.name}</span>
+                  
+                  {/* Social Share Buttons */}
+                  <div className="flex items-center mt-2 sm:mt-0">
+                    <SocialShareButtons 
+                      url={`/blog/${postQuery.data.slug}`}
+                      title={postQuery.data.title}
+                      description={postQuery.data.excerpt}
+                    />
                   </div>
                 </div>
                 
@@ -215,6 +228,18 @@ const SinglePost: React.FC = () => {
                     </div>
                   </div>
                 )}
+                
+                {/* Article End Share Section */}
+                <div className="flex flex-col items-center text-center mb-12 border-t border-b border-border py-6">
+                  <h4 className="font-serif text-lg font-medium mb-3">Share this article</h4>
+                  <p className="text-muted-foreground text-sm mb-4">If you found this article helpful, please share it with your friends and colleagues</p>
+                  <SocialShareButtons
+                    url={`/blog/${postQuery.data.slug}`}
+                    title={postQuery.data.title}
+                    description={postQuery.data.excerpt}
+                    className="justify-center"
+                  />
+                </div>
               </>
             ) : (
               <div className="text-center py-12">

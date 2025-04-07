@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/hooks/use-auth';
+import { useScrollEffect } from '@/hooks/use-scroll-effect';
+import { cn } from '@/lib/utils';
 import { 
   Menu, 
   User, 
@@ -28,18 +30,28 @@ import {
 const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
-  const [scrolled, setScrolled] = useState(false);
   const { user, isPremium, loginMutation, logoutMutation } = useAuth();
-
-  // Handle scrolling effects
-  useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 10;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
-      }
-    };
-
+  
+  // Use the scroll effect hook for header visibility
+  const { visible } = useScrollEffect({
+    hideOnScrollDown: true,
+    threshold: 50,
+    alwaysShowAtTop: true
+  });
+  
+  // Also track if we've scrolled down at all for styling
+  const [scrolled, setScrolled] = useState(false);
+  
+  // Track scroll position for styling changes
+  const handleScroll = () => {
+    const isScrolled = window.scrollY > 10;
+    if (isScrolled !== scrolled) {
+      setScrolled(isScrolled);
+    }
+  };
+  
+  // Add scroll event listener
+  React.useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -56,9 +68,11 @@ const Header: React.FC = () => {
   };
 
   // Floating island styling based on scroll state
-  const headerClasses = scrolled
-    ? "fixed top-5 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-white/95 backdrop-blur-md z-50 rounded-full shadow-lg transition-all duration-300 ease-in-out"
-    : "fixed top-5 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-white/90 backdrop-blur-sm z-50 rounded-full border border-neutral-200/50 transition-all duration-300 ease-in-out";
+  const headerClasses = cn(
+    "fixed left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl backdrop-blur-md z-50 rounded-full transition-all duration-300 ease-in-out",
+    scrolled ? "bg-white/95 shadow-lg" : "bg-white/90 backdrop-blur-sm border border-neutral-200/50",
+    visible ? "top-5 translate-y-0" : "-top-20 translate-y-0"
+  );
 
   return (
     <header className={headerClasses}>
