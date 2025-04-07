@@ -15,30 +15,36 @@ import {
 import { z } from "zod";
 import { setupAuth } from "./auth";
 import { generateSitemap } from "./sitemap-generator";
+import rateLimit from 'express-rate-limit';
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5 // limit each IP to 5 requests per windowMs
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup authentication routes
-  setupAuth(app);
-  
+  // Setup authentication routes with rate limiting
+  setupAuth(app, authLimiter); // Assuming setupAuth accepts the limiter as an argument
+
   // SEO-related routes
   app.get('/sitemap.xml', (_req: Request, res: Response) => {
     const sitemapPath = path.join(process.cwd(), 'client', 'public', 'sitemap.xml');
     res.contentType('application/xml');
     res.sendFile(sitemapPath);
   });
-  
+
   app.get('/robots.txt', (_req: Request, res: Response) => {
     const robotsPath = path.join(process.cwd(), 'client', 'public', 'robots.txt');
     res.contentType('text/plain');
     res.sendFile(robotsPath);
   });
-  
+
   // Sitemap generation endpoint (admin only)
   app.post('/api/regenerate-sitemap', async (req: Request, res: Response) => {
     if (!req.isAuthenticated() || req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Forbidden - Admin access required' });
     }
-    
+
     try {
       await generateSitemap();
       res.json({ message: 'Sitemap regenerated successfully' });
@@ -47,10 +53,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Failed to regenerate sitemap' });
     }
   });
-  
+
   // API routes for blog
   const apiRouter = "/api";
-  
+
   // Get all categories
   app.get(`${apiRouter}/categories`, async (_req: Request, res: Response) => {
     try {
@@ -60,7 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch categories" });
     }
   });
-  
+
   // Get all posts
   app.get(`${apiRouter}/posts`, async (_req: Request, res: Response) => {
     try {
@@ -70,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch posts" });
     }
   });
-  
+
   // Get featured posts
   app.get(`${apiRouter}/posts/featured`, async (_req: Request, res: Response) => {
     try {
@@ -80,7 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch featured posts" });
     }
   });
-  
+
   // Get posts by category
   app.get(`${apiRouter}/categories/:categoryId/posts`, async (req: Request, res: Response) => {
     try {
@@ -88,29 +94,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(categoryId)) {
         return res.status(400).json({ message: "Invalid category ID" });
       }
-      
+
       const posts = await storage.getPostsByCategory(categoryId);
       res.json(posts);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch posts for category" });
     }
   });
-  
+
   // Get single post by slug
   app.get(`${apiRouter}/posts/:slug`, async (req: Request, res: Response) => {
     try {
       const post = await storage.getPostBySlug(req.params.slug);
-      
+
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       res.json(post);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch post" });
     }
   });
-  
+
   // Get author information
   app.get(`${apiRouter}/authors/:id`, async (req: Request, res: Response) => {
     try {
@@ -118,19 +124,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid author ID" });
       }
-      
+
       const author = await storage.getAuthorById(id);
-      
+
       if (!author) {
         return res.status(404).json({ message: "Author not found" });
       }
-      
+
       res.json(author);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch author" });
     }
   });
-  
+
   // Create new post (for CMS)
   app.post(`${apiRouter}/posts`, async (req: Request, res: Response) => {
     try {
@@ -144,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create post" });
     }
   });
-  
+
   // Update existing post (for CMS)
   app.put(`${apiRouter}/posts/:id`, async (req: Request, res: Response) => {
     try {
@@ -152,14 +158,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       const postData = insertPostSchema.partial().parse(req.body);
       const updatedPost = await storage.updatePost(id, postData);
-      
+
       if (!updatedPost) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       res.json(updatedPost);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -168,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to update post" });
     }
   });
-  
+
   // Delete post (for CMS)
   app.delete(`${apiRouter}/posts/:id`, async (req: Request, res: Response) => {
     try {
@@ -176,19 +182,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       const success = await storage.deletePost(id);
-      
+
       if (!success) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       res.status(204).end();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete post" });
     }
   });
-  
+
   // Create new category (for CMS)
   app.post(`${apiRouter}/categories`, async (req: Request, res: Response) => {
     try {
@@ -202,7 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create category" });
     }
   });
-  
+
   // Subscribe to newsletter
   app.post(`${apiRouter}/subscribe`, async (req: Request, res: Response) => {
     try {
@@ -216,7 +222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to subscribe" });
     }
   });
-  
+
   // Send contact message
   app.post(`${apiRouter}/contact`, async (req: Request, res: Response) => {
     try {
@@ -230,7 +236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to send message" });
     }
   });
-  
+
   // Get all messages (for CMS)
   app.get(`${apiRouter}/messages`, async (_req: Request, res: Response) => {
     try {
@@ -240,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch messages" });
     }
   });
-  
+
   // Mark message as read (for CMS)
   app.put(`${apiRouter}/messages/:id/read`, async (req: Request, res: Response) => {
     try {
@@ -248,32 +254,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid message ID" });
       }
-      
+
       const updatedMessage = await storage.markMessageAsRead(id);
-      
+
       if (!updatedMessage) {
         return res.status(404).json({ message: "Message not found" });
       }
-      
+
       res.json(updatedMessage);
     } catch (error) {
       res.status(500).json({ message: "Failed to mark message as read" });
     }
   });
-  
+
   // Analytics routes - require authentication
   const adminGuard = (req: Request, res: Response, next: Function) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    
+
     if (req.user.role !== "admin") {
       return res.status(403).json({ message: "Forbidden - Admin access required" });
     }
-    
+
     next();
   };
-  
+
   // Analytics - Page Views
   app.post(`${apiRouter}/analytics/page-views`, async (req: Request, res: Response) => {
     try {
@@ -282,17 +288,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.isAuthenticated() && req.user) {
         pageViewData.userId = req.user.id;
       }
-      
+
       // Add session ID if not provided
       if (!pageViewData.sessionId) {
         pageViewData.sessionId = req.sessionID;
       }
-      
+
       // Extract device/browser info from user agent
       if (req.headers['user-agent']) {
         pageViewData.userAgent = req.headers['user-agent'];
       }
-      
+
       const pageView = await storage.createPageView(pageViewData);
       res.status(201).json(pageView);
     } catch (error) {
@@ -302,7 +308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to record page view" });
     }
   });
-  
+
   // Get recent page views (admin only)
   app.get(`${apiRouter}/analytics/page-views`, adminGuard, async (req: Request, res: Response) => {
     try {
@@ -313,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch page views" });
     }
   });
-  
+
   // Get unique visitor count
   app.get(`${apiRouter}/analytics/visitors`, adminGuard, async (req: Request, res: Response) => {
     try {
@@ -324,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch visitor count" });
     }
   });
-  
+
   // Traffic Stats
   app.post(`${apiRouter}/analytics/traffic`, adminGuard, async (req: Request, res: Response) => {
     try {
@@ -338,24 +344,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to record traffic stats" });
     }
   });
-  
+
   // Get traffic stats by period
   app.get(`${apiRouter}/analytics/traffic/:periodType`, adminGuard, async (req: Request, res: Response) => {
     try {
       const periodType = req.params.periodType;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 30;
-      
+
       if (!['daily', 'weekly', 'monthly'].includes(periodType)) {
         return res.status(400).json({ message: "Invalid period type" });
       }
-      
+
       const trafficStats = await storage.getTrafficStats(periodType, limit);
       res.json(trafficStats);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch traffic stats" });
     }
   });
-  
+
   // Content Performance
   app.post(`${apiRouter}/analytics/content-performance`, adminGuard, async (req: Request, res: Response) => {
     try {
@@ -369,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to record content performance" });
     }
   });
-  
+
   // Get content performance for a specific post
   app.get(`${apiRouter}/analytics/content-performance/:postId`, adminGuard, async (req: Request, res: Response) => {
     try {
@@ -377,19 +383,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(postId)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       const performance = await storage.getContentPerformance(postId);
-      
+
       if (!performance) {
         return res.status(404).json({ message: "Content performance data not found" });
       }
-      
+
       res.json(performance);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch content performance" });
     }
   });
-  
+
   // Get top performing content
   app.get(`${apiRouter}/analytics/top-content`, adminGuard, async (req: Request, res: Response) => {
     try {
@@ -400,18 +406,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch top performing content" });
     }
   });
-  
+
   // User Engagement
   app.post(`${apiRouter}/analytics/user-engagement`, async (req: Request, res: Response) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
+
       const engagementData = insertUserEngagementSchema.parse(req.body);
       // Ensure user ID matches authenticated user
       engagementData.userId = req.user.id;
-      
+
       const engagement = await storage.createOrUpdateUserEngagement(engagementData);
       res.status(201).json(engagement);
     } catch (error) {
@@ -421,7 +427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to record user engagement" });
     }
   });
-  
+
   // Get most engaged users (admin only)
   app.get(`${apiRouter}/analytics/engaged-users`, adminGuard, async (req: Request, res: Response) => {
     try {
@@ -432,7 +438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch engaged users" });
     }
   });
-  
+
   // Analytics Dashboard Summary
   app.get(`${apiRouter}/analytics/summary`, adminGuard, async (req: Request, res: Response) => {
     try {
@@ -441,7 +447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const recentPageViews = await storage.getRecentPageViews(10);
       const topContent = await storage.getTopPerformingContent(5);
       const dailyTraffic = await storage.getTrafficStats('daily', 7);
-      
+
       res.json({
         visitorCount,
         recentPageViews,

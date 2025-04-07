@@ -34,7 +34,7 @@ async function comparePasswords(supplied: string, stored: string) {
 
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "blog-session-secret",
+    secret: process.env.SESSION_SECRET || (process.env.NODE_ENV === 'production' ? undefined : "dev-session-secret"),
     resave: false,
     saveUninitialized: false,
     store: new PostgresStore({
