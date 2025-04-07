@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import AdUnit from './AdUnit';
 import ManualAdUnit from './ManualAdUnit';
 import { ADS_ENABLED, USE_ADSENSE, ADSENSE_SLOTS } from '@/lib/adConfig';
+import { useAuth } from '@/hooks/use-auth';
 
 export type AdPosition = 'header' | 'sidebar' | 'inContent' | 'footer';
 
@@ -26,8 +27,11 @@ export function AdContainer({
   style,
   contentLength,
 }: AdContainerProps) {
-  // Don't render anything if ads are disabled
-  if (!ADS_ENABLED) {
+  // Use auth hook to check if user is premium
+  const { isPremium } = useAuth();
+  
+  // Don't render anything if ads are disabled or user is premium
+  if (!ADS_ENABLED || isPremium) {
     return null;
   }
   

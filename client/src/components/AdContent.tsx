@@ -2,6 +2,7 @@ import React from 'react';
 import { insertAdsInContent } from '@/lib/adUtils';
 import AdContainer from '@/components/ads/AdContainer';
 import { ADS_ENABLED, AD_PLACEMENTS } from '@/lib/adConfig';
+import { useAuth } from '@/hooks/use-auth';
 
 interface AdContentProps {
   children: React.ReactNode;
@@ -25,8 +26,11 @@ const AdContent: React.FC<AdContentProps> = ({
   containerClassName,
   minContentLength = AD_PLACEMENTS.MIN_CONTENT_LENGTH,
 }) => {
-  // If ads are disabled, just return children
-  if (!ADS_ENABLED) {
+  // Use auth hook to check if user is premium
+  const { isPremium } = useAuth();
+  
+  // If ads are disabled or user is premium, just return children
+  if (!ADS_ENABLED || isPremium) {
     return <>{children}</>;
   }
 

@@ -13,6 +13,7 @@ export const users = pgTable("users", {
   role: text("role").default("user").notNull(),
   profileImage: text("profile_image"),
   bio: text("bio"),
+  isPremium: boolean("is_premium").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   lastLogin: timestamp("last_login"),
   isActive: boolean("is_active").default(true),
@@ -27,9 +28,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   role: true,
   profileImage: true,
   bio: true,
+  isPremium: true,
   isActive: true,
 }).extend({
   role: z.enum(['user', 'admin', 'editor']).default('user'),
+  isPremium: z.boolean().default(false),
   isActive: z.boolean().default(true),
 });
 

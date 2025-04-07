@@ -14,6 +14,7 @@ import AdminEditPost from "@/pages/AdminEditPost";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AdSenseScript from "@/components/ads/AdSenseScript";
+import { AuthProvider } from "@/hooks/use-auth";
 
 function Router() {
   return (
@@ -34,20 +35,22 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Load AdSense script */}
-      <AdSenseScript 
-        onLoad={() => console.log('AdSense loaded successfully')}
-        onError={(error) => console.error('AdSense error:', error)}
-      />
-      
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow">
-          <Router />
-        </main>
-        <Footer />
-      </div>
-      <Toaster />
+      <AuthProvider>
+        {/* Load AdSense script */}
+        <AdSenseScript 
+          onLoad={() => console.log('AdSense loaded successfully')}
+          onError={(error) => console.error('AdSense error:', error)}
+        />
+        
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-grow">
+            <Router />
+          </main>
+          <Footer />
+        </div>
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
