@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useParams, Link } from 'wouter';
 import { formatDistanceToNow } from 'date-fns';
 import { usePostBySlug, useAllCategories, useAllPosts, useAuthor } from '@/lib/api';
@@ -47,24 +48,22 @@ const SinglePost: React.FC = () => {
 
   // Render markdown content
   const renderContent = (content: string) => {
-    // This is a simple implementation to handle markdown headers, paragraphs,
-    // lists, and code blocks. For a production app, you might want to use
-    // a proper markdown parser like react-markdown
-    const html = content
-      // Headers
-      .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold font-serif mt-6 mb-4">$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold font-serif mt-6 mb-3">$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold font-serif mt-5 mb-3">$1</h3>')
-      // Lists
-      .replace(/^\d+\. (.*$)/gim, '<li class="ml-6 list-decimal mb-2">$1</li>')
-      .replace(/^- (.*$)/gim, '<li class="ml-6 list-disc mb-2">$1</li>')
-      // Bold and italic
-      .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-      .replace(/\*(.*)\*/gim, '<em>$1</em>')
-      // Paragraphs
-      .replace(/^(?!<h|<li|<ul|<ol|<p)(.*$)/gim, '<p class="mb-4 leading-relaxed">$1</p>');
-
-    return <div dangerouslySetInnerHTML={{ __html: html }} />;
+    return (
+      <ReactMarkdown
+        className="prose prose-lg dark:prose-invert max-w-none"
+        components={{
+          h1: ({node, ...props}) => <h1 className="text-3xl font-bold font-serif mt-6 mb-4" {...props}/>,
+          h2: ({node, ...props}) => <h2 className="text-2xl font-bold font-serif mt-6 mb-3" {...props}/>,
+          h3: ({node, ...props}) => <h3 className="text-xl font-bold font-serif mt-5 mb-3" {...props}/>,
+          p: ({node, ...props}) => <p className="mb-4 leading-relaxed" {...props}/>,
+          ul: ({node, ...props}) => <ul className="ml-6 list-disc mb-4" {...props}/>,
+          ol: ({node, ...props}) => <ol className="ml-6 list-decimal mb-4" {...props}/>,
+          li: ({node, ...props}) => <li className="mb-2" {...props}/>
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    );
   };
 
   return (
