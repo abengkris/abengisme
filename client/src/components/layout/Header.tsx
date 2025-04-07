@@ -70,7 +70,9 @@ const Header: React.FC = () => {
   // Floating island styling based on scroll state
   const headerClasses = cn(
     "fixed left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl backdrop-blur-md z-50 rounded-full transition-all duration-300 ease-in-out",
-    scrolled ? "bg-white/95 shadow-lg" : "bg-white/90 backdrop-blur-sm border border-neutral-200/50",
+    scrolled 
+      ? "bg-background/95 dark:bg-background/95 shadow-lg dark:shadow-black/10" 
+      : "bg-background/90 dark:bg-background/80 backdrop-blur-sm border border-border/50 dark:border-border/30",
     visible ? "top-5 translate-y-0" : "-top-20 translate-y-0"
   );
 
@@ -87,30 +89,30 @@ const Header: React.FC = () => {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-2">
-            <Link href="/" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-slate-100 transition-all ${isActive('/') ? 'text-accent font-medium' : 'text-primary'}`}>
+            <Link href="/" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all ${isActive('/') ? 'text-accent font-medium' : 'text-primary'}`}>
               <Home className="w-4 h-4 mr-1" />
               Home
             </Link>
-            <Link href="/blog" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-slate-100 transition-all ${isActive('/blog') ? 'text-accent font-medium' : 'text-primary'}`}>
+            <Link href="/blog" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all ${isActive('/blog') ? 'text-accent font-medium' : 'text-primary'}`}>
               <BookOpen className="w-4 h-4 mr-1" />
               Blog
             </Link>
-            <Link href="/about" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-slate-100 transition-all ${isActive('/about') ? 'text-accent font-medium' : 'text-primary'}`}>
+            <Link href="/about" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all ${isActive('/about') ? 'text-accent font-medium' : 'text-primary'}`}>
               <Info className="w-4 h-4 mr-1" />
               About
             </Link>
-            <Link href="/contact" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-slate-100 transition-all ${isActive('/contact') ? 'text-accent font-medium' : 'text-primary'}`}>
+            <Link href="/contact" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all ${isActive('/contact') ? 'text-accent font-medium' : 'text-primary'}`}>
               <MessageSquare className="w-4 h-4 mr-1" />
               Contact
             </Link>
 
             {/* Divider */}
-            <div className="h-8 w-px bg-neutral-200 mx-1"></div>
+            <div className="h-8 w-px bg-border dark:bg-border/50 mx-1"></div>
 
             {/* Auth Section */}
             {user ? (
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center px-4 py-2 rounded-full hover:bg-slate-100 transition-all">
+                <DropdownMenuTrigger className="flex items-center px-4 py-2 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all">
                   <div className="flex items-center text-sm font-medium">
                     <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center mr-2">
                       <User className="w-4 h-4 text-accent" />
@@ -221,7 +223,7 @@ const Header: React.FC = () => {
 
             <button
               onClick={toggleMobileMenu}
-              className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-slate-100 transition-all"
+              className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all"
               aria-label="Toggle menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -234,21 +236,21 @@ const Header: React.FC = () => {
       {/* Mobile Navigation Menu */}
       <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`}>
         <div className="container mx-auto px-4 py-3">
-          <nav className="bg-white rounded-2xl shadow-lg mt-2 overflow-hidden">
+          <nav className="bg-card dark:bg-card rounded-2xl shadow-lg dark:shadow-black/10 mt-2 overflow-hidden">
             <div className="flex flex-col py-2">
-              <Link href="/" className={`flex items-center px-6 py-3 hover:bg-slate-50 transition-colors ${isActive('/') ? 'text-accent font-medium' : 'text-primary'}`}>
+              <Link href="/" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/') ? 'text-accent font-medium' : 'text-primary'}`}>
                 <Home className="w-5 h-5 mr-3" />
                 Home
               </Link>
-              <Link href="/blog" className={`flex items-center px-6 py-3 hover:bg-slate-50 transition-colors ${isActive('/blog') ? 'text-accent font-medium' : 'text-primary'}`}>
+              <Link href="/blog" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/blog') ? 'text-accent font-medium' : 'text-primary'}`}>
                 <BookOpen className="w-5 h-5 mr-3" />
                 Blog
               </Link>
-              <Link href="/about" className={`flex items-center px-6 py-3 hover:bg-slate-50 transition-colors ${isActive('/about') ? 'text-accent font-medium' : 'text-primary'}`}>
+              <Link href="/about" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/about') ? 'text-accent font-medium' : 'text-primary'}`}>
                 <Info className="w-5 h-5 mr-3" />
                 About
               </Link>
-              <Link href="/contact" className={`flex items-center px-6 py-3 hover:bg-slate-50 transition-colors ${isActive('/contact') ? 'text-accent font-medium' : 'text-primary'}`}>
+              <Link href="/contact" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/contact') ? 'text-accent font-medium' : 'text-primary'}`}>
                 <MessageSquare className="w-5 h-5 mr-3" />
                 Contact
               </Link>
@@ -256,13 +258,13 @@ const Header: React.FC = () => {
               {/* Admin links in mobile menu */}
               {user && user.role === 'admin' && (
                 <>
-                  <div className="h-px bg-neutral-200 mx-5 my-2" />
+                  <div className="h-px bg-border dark:bg-border/50 mx-5 my-2" />
                   <h4 className="text-xs uppercase text-muted-foreground px-6 pt-2 pb-1">Admin</h4>
-                  <Link href="/admin" className={`flex items-center px-6 py-3 hover:bg-slate-50 transition-colors ${isActive('/admin') && !isActive('/admin/analytics') ? 'text-accent font-medium' : 'text-primary'}`}>
+                  <Link href="/admin" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/admin') && !isActive('/admin/analytics') ? 'text-accent font-medium' : 'text-primary'}`}>
                     <LayoutDashboard className="w-5 h-5 mr-3" />
                     Dashboard
                   </Link>
-                  <Link href="/admin/analytics" className={`flex items-center px-6 py-3 hover:bg-slate-50 transition-colors ${isActive('/admin/analytics') ? 'text-accent font-medium' : 'text-primary'}`}>
+                  <Link href="/admin/analytics" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/admin/analytics') ? 'text-accent font-medium' : 'text-primary'}`}>
                     <BarChart className="w-5 h-5 mr-3" />
                     Analytics
                   </Link>

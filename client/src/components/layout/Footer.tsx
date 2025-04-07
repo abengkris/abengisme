@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
   
   return (
     <footer className={cn(
-      "bg-white border-t border-neutral-200 py-8",
+      "bg-background dark:bg-background border-t border-border dark:border-border/50 py-8",
       "md:pb-8", // Default padding on desktop
       visible ? "pb-8" : "pb-24" // Dynamic padding based on mobile nav visibility
     )}>
@@ -52,14 +52,14 @@ const Footer: React.FC = () => {
           </div>
           
           {/* Footer Ad */}
-          <div className="my-8 bg-slate-50/50 rounded-lg p-4 border border-neutral-100">
+          <div className="my-8 bg-muted/20 dark:bg-muted/10 rounded-lg p-4 border border-border/50 dark:border-border/30">
             <div className="text-center mb-2">
               <span className="text-sm text-muted-foreground">Sponsored</span>
             </div>
             <AdContainer position="footer" />
           </div>
           
-          <hr className="border-neutral-200 my-6" />
+          <hr className="border-border dark:border-border/50 my-6" />
           
           <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
             <p>&copy; {new Date().getFullYear()} MindfulThoughts. All rights reserved.</p>
