@@ -103,7 +103,7 @@ const Header: React.FC = () => {
                     <ChevronDown className="h-4 w-4 ml-1" />
                   </div>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align="end" className="w-48 mt-2" sideOffset={20} forceMount>
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
@@ -139,15 +139,20 @@ const Header: React.FC = () => {
                     <User className="w-5 h-5 text-accent" />
                   </div>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="mt-2" sideOffset={20} forceMount>
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
                   <DropdownMenuItem>
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <UserCheck className="w-4 h-4 mr-2" />
                     {isPremium ? 'Premium Active' : 'Upgrade to Premium'}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
+                    <LogOut className="w-4 h-4 mr-2" /> 
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
