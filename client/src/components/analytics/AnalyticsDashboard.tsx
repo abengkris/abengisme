@@ -16,8 +16,27 @@ export function AnalyticsDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center w-full h-96">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="space-y-0 pb-2">
+                <div className="h-4 w-24 animate-pulse rounded bg-muted"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 w-16 animate-pulse rounded bg-muted"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardHeader>
+            <div className="h-6 w-48 animate-pulse rounded bg-muted"></div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full animate-pulse rounded bg-muted"></div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -117,10 +136,19 @@ export function AnalyticsDashboard() {
       </div>
 
       <Tabs defaultValue="traffic" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="traffic">Traffic Overview</TabsTrigger>
-          <TabsTrigger value="content">Content Performance</TabsTrigger>
-          <TabsTrigger value="engagement">User Engagement</TabsTrigger>
+        <TabsList className="w-full justify-start gap-4 rounded-lg border p-1">
+          <TabsTrigger value="traffic" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Traffic Overview
+          </TabsTrigger>
+          <TabsTrigger value="content" className="flex items-center gap-2">
+            <BarChart className="h-4 w-4" />
+            Content Performance
+          </TabsTrigger>
+          <TabsTrigger value="engagement" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            User Engagement
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="traffic" className="space-y-4">
