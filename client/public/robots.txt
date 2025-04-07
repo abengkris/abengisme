@@ -1,0 +1,10 @@
+# robots.txt for Mindful Thoughts
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://mindfulthoughts.com/sitemap.xml
+
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /api/

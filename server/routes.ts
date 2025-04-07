@@ -1,5 +1,6 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
+import path from "path";
 import { storage } from "./storage";
 import { 
   insertPostSchema, 
@@ -13,10 +14,39 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { setupAuth } from "./auth";
+import { generateSitemap } from "./sitemap-generator";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
   setupAuth(app);
+  
+  // SEO-related routes
+  app.get('/sitemap.xml', (_req: Request, res: Response) => {
+    const sitemapPath = path.join(process.cwd(), 'client', 'public', 'sitemap.xml');
+    res.contentType('application/xml');
+    res.sendFile(sitemapPath);
+  });
+  
+  app.get('/robots.txt', (_req: Request, res: Response) => {
+    const robotsPath = path.join(process.cwd(), 'client', 'public', 'robots.txt');
+    res.contentType('text/plain');
+    res.sendFile(robotsPath);
+  });
+  
+  // Sitemap generation endpoint (admin only)
+  app.post('/api/regenerate-sitemap', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated() || req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden - Admin access required' });
+    }
+    
+    try {
+      await generateSitemap();
+      res.json({ message: 'Sitemap regenerated successfully' });
+    } catch (error) {
+      console.error('Error regenerating sitemap:', error);
+      res.status(500).json({ message: 'Failed to regenerate sitemap' });
+    }
+  });
   
   // API routes for blog
   const apiRouter = "/api";

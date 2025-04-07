@@ -43,7 +43,6 @@ const PostCard: React.FC<PostCardProps> = ({
           height="200"
           loading="lazy"
           decoding="async"
-          fetchPriority="auto"
         />
       </div>
       
