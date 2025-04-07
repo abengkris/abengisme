@@ -6,7 +6,8 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as UserType } from "@shared/schema";
-import createMemoryStore from "memorystore";
+import connectPgSimple from "connect-pg-simple";
+import { pool } from "./db";
 
 declare global {
   namespace Express {
@@ -16,7 +17,7 @@ declare global {
 }
 
 const scryptAsync = promisify(scrypt);
-const MemoryStore = createMemoryStore(session);
+const PostgresStore = connectPgSimple(session);
 
 async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -36,8 +37,10 @@ export function setupAuth(app: Express) {
     secret: process.env.SESSION_SECRET || "blog-session-secret",
     resave: false,
     saveUninitialized: false,
-    store: new MemoryStore({
-      checkPeriod: 86400000, // prune expired entries every 24h
+    store: new PostgresStore({
+      pool,
+      tableName: 'session', // Use a standard table name
+      createTableIfMissing: true, // Automatically create the session table if it doesn't exist
     }),
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
