@@ -122,7 +122,7 @@ const Home: React.FC = () => {
       </section>
       
       {/* Ad Banner */}
-      <section className="py-4 border-t border-b border-neutral-100">
+      <section className="py-4 border-t border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">
             <AdContainer position="header" />
@@ -191,7 +191,7 @@ const Home: React.FC = () => {
       </section>
       
       {/* Newsletter Section */}
-      <section id="subscribe" className="py-12 md:py-16 bg-white">
+      <section id="subscribe" className="py-12 md:py-16 bg-card">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4">Join the Newsletter</h2>
