@@ -64,7 +64,7 @@ const NewsletterForm: React.FC = () => {
                   <Input
                     type="email"
                     placeholder="Your email address"
-                    className="px-4 py-3 rounded-md border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
+                    className="px-4 py-3 rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent bg-background"
                     {...field}
                   />
                 </FormControl>
