@@ -109,8 +109,21 @@ export const createPost = async (post: InsertPost) => {
 };
 
 export const updatePost = async (id: number, post: Partial<InsertPost>) => {
-  const response = await api.post(`/api/posts/${id}`, post);
-  return response;
+  try {
+    const response = await fetch(`/api/posts/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(post),
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error(`API Error (PUT /api/posts/${id}):`, error);
+    throw error;
+  }
 };
 
 export const deletePost = async (id: number) => {
