@@ -27,7 +27,7 @@ const FeaturedPostCard: React.FC<FeaturedPostCardProps> = ({
   createdAt
 }) => {
   return (
-    <article className="post-card bg-white rounded-lg overflow-hidden shadow-sm border border-neutral-200">
+    <article className="post-card bg-card rounded-lg overflow-hidden shadow-sm border border-border">
       <img 
         src={featuredImage} 
         alt={title}
@@ -38,7 +38,7 @@ const FeaturedPostCard: React.FC<FeaturedPostCardProps> = ({
       <div className="p-6">
         <div className="flex items-center mb-4">
           <span className="text-xs font-medium text-accent uppercase tracking-wider">{categoryName}</span>
-          <span className="mx-2 text-muted-foreground">•</span>
+          <span className="mx-2 text-muted-foreground/60">•</span>
           <span className="text-sm text-muted-foreground">{readTime} min read</span>
         </div>
         <h3 className="font-serif text-xl font-bold mb-3 hover:text-accent transition-colors">
