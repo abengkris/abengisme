@@ -126,6 +126,12 @@ const Header: React.FC = () => {
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
+                  <Link href="/dashboard">
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link href="/profile">
                     <User className="w-4 h-4 mr-2" />
                     Profile
@@ -181,6 +187,12 @@ const Header: React.FC = () => {
               <DropdownMenuContent align="end" className="w-48 mt-2" sideOffset={20}>
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard">
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/profile">
                     <User className="w-4 h-4 mr-2" />

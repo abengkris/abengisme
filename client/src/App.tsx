@@ -19,6 +19,7 @@ import { useAuth } from "@/hooks/use-auth";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
 import Profile from '@/pages/Profile';
 import Search from '@/pages/Search';
+import Dashboard from '@/pages/Dashboard'; // Added import
 
 const SinglePost = React.lazy(() => import("@/pages/SinglePost"));
 const Admin = React.lazy(() => import("@/pages/Admin"));
@@ -52,6 +53,7 @@ function Router() {
           <Route path="/auth" component={AuthPage} />
           <Route path="/search" component={Search} />
           <Route path="/profile" component={<ProtectedRoute component={Profile} />} />
+          <Route path="/dashboard" component={Dashboard} /> {/* Added dashboard route */}
 
           {/* Protected Admin Routes */}
           <Route path="/admin">{() => (user ? <Admin /> : <AuthPage />)}</Route>

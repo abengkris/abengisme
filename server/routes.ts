@@ -160,6 +160,63 @@ app.get("/api/search", async (req: Request, res: Response) => {
     }
   });
 
+  // Bookmark routes
+  app.post(`${apiRouter}/bookmarks`, async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const bookmark = await storage.createBookmark({
+        userId: req.user.id,
+        postId: req.body.postId,
+      });
+      res.status(201).json(bookmark);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create bookmark" });
+    }
+  });
+
+  app.get(`${apiRouter}/bookmarks`, async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const bookmarks = await storage.getUserBookmarks(req.user.id);
+      res.json(bookmarks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch bookmarks" });
+    }
+  });
+
+  app.delete(`${apiRouter}/bookmarks/:id`, async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      await storage.deleteBookmark(parseInt(req.params.id), req.user.id);
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete bookmark" });
+    }
+  });
+
+  // Reading stats
+  app.get(`${apiRouter}/reading-stats`, async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const stats = await storage.getUserReadingStats(req.user.id);
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch reading stats" });
+    }
+  });
+
   // Get single post by slug
   app.get(`${apiRouter}/posts/:slug`, async (req: Request, res: Response) => {
     try {

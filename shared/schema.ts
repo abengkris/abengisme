@@ -470,3 +470,14 @@ export const relations = {
     }
   }
 };
+
+// Added bookmark schema
+export const bookmarks = pgTable('bookmarks', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull(),
+  postId: integer('post_id').references(() => posts.id).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export type Bookmark = typeof bookmarks.$inferSelect;
+export type InsertBookmark = typeof bookmarks.$inferInsert;
