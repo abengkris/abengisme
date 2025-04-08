@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/hooks/use-auth';
@@ -16,7 +15,8 @@ import {
   Info,
   MessageSquare,
   BarChart,
-  LayoutDashboard
+  LayoutDashboard,
+  Search
 } from 'lucide-react';
 
 import {
@@ -32,22 +32,22 @@ const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
   const { user, isPremium, loginMutation, logoutMutation } = useAuth();
-  
+
   const { visible } = useScrollEffect({
     hideOnScrollDown: true,
     threshold: 50,
     alwaysShowAtTop: true
   });
-  
+
   const [scrolled, setScrolled] = useState(false);
-  
+
   const handleScroll = () => {
     const isScrolled = window.scrollY > 10;
     if (isScrolled !== scrolled) {
       setScrolled(isScrolled);
     }
   };
-  
+
   React.useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => {
@@ -86,7 +86,7 @@ const Header: React.FC = () => {
             Mindful<span className="bg-gradient-to-r from-accent to-accent/70 bg-clip-text text-transparent group-hover:to-accent transition-all">Thoughts</span>
           </span>
         </Link>
-        
+
         <nav className="hidden md:flex items-center space-x-2">
           <Link href="/" className={navLinkClasses(isActive('/'))}>
             <Home className="w-4 h-4 mr-2" />
@@ -103,6 +103,10 @@ const Header: React.FC = () => {
           <Link href="/contact" className={navLinkClasses(isActive('/contact'))}>
             <MessageSquare className="w-4 h-4 mr-2" />
             Contact
+          </Link>
+          <Link href="/search" className={navLinkClasses(isActive('/search'))}>
+            <Search className="w-4 h-4 mr-2" />
+            Search
           </Link>
 
           <div className="h-8 w-px bg-border/50 dark:bg-border/30 mx-2"></div>
@@ -121,15 +125,17 @@ const Header: React.FC = () => {
               <DropdownMenuContent align="end" className="w-48 mt-2" sideOffset={20}>
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <UserCheck className="w-4 h-4 mr-2" />
                   {isPremium ? 'Premium Active' : 'Upgrade to Premium'}
                 </DropdownMenuItem>
-                
+
                 {user && user.role === 'admin' && (
                   <>
                     <DropdownMenuSeparator />
@@ -148,7 +154,7 @@ const Header: React.FC = () => {
                     </DropdownMenuItem>
                   </>
                 )}
-                
+
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
                   <LogOut className="w-4 h-4 mr-2" />
@@ -163,7 +169,7 @@ const Header: React.FC = () => {
             </Link>
           )}
         </nav>
-        
+
         <div className="flex items-center md:hidden gap-2">
           {user ? (
             <DropdownMenu>
@@ -175,15 +181,17 @@ const Header: React.FC = () => {
               <DropdownMenuContent align="end" className="w-48 mt-2" sideOffset={20}>
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <UserCheck className="w-4 h-4 mr-2" />
                   {isPremium ? 'Premium Active' : 'Upgrade to Premium'}
                 </DropdownMenuItem>
-                
+
                 {user && user.role === 'admin' && (
                   <>
                     <DropdownMenuSeparator />
@@ -202,7 +210,7 @@ const Header: React.FC = () => {
                     </DropdownMenuItem>
                   </>
                 )}
-                
+
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
                   <LogOut className="w-4 h-4 mr-2" />
@@ -227,7 +235,7 @@ const Header: React.FC = () => {
           </button>
         </div>
       </div>
-      
+
       <div 
         id="mobile-menu"
         role="navigation"
@@ -255,7 +263,11 @@ const Header: React.FC = () => {
               <MessageSquare className="w-5 h-5 mr-3" />
               Contact
             </Link>
-            
+            <Link href="/search" className={cn("flex items-center px-4 py-3 hover:bg-muted/50 dark:hover:bg-muted/10 transition-colors", isActive('/search') ? 'text-accent font-medium' : 'text-foreground/80')}>
+              <Search className="w-5 h-5 mr-3" />
+              Search
+            </Link>
+
             {user && user.role === 'admin' && (
               <>
                 <div className="h-px bg-border/30 dark:bg-border/20 mx-4 my-2" />

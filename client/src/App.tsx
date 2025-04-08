@@ -17,12 +17,25 @@ import AdSenseScript from "@/components/ads/AdSenseScript";
 import { AuthProvider } from "@/hooks/use-auth";
 import { useAuth } from "@/hooks/use-auth";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
+import Profile from '@/pages/Profile';
+import Search from '@/pages/Search';
 
 const SinglePost = React.lazy(() => import("@/pages/SinglePost"));
 const Admin = React.lazy(() => import("@/pages/Admin"));
 const AdminNewPost = React.lazy(() => import("@/pages/AdminNewPost"));
 const AdminEditPost = React.lazy(() => import("@/pages/AdminEditPost"));
 const Analytics = React.lazy(() => import("@/pages/Analytics"));
+
+const ProtectedRoute = ({ component: Component, ...rest }) => {
+  const { user } = useAuth();
+  return (
+    <Route
+      {...rest}
+      component={() => (user ? <Component /> : <AuthPage />)}
+    />
+  );
+};
+
 
 function Router() {
   const { user } = useAuth();
@@ -37,6 +50,8 @@ function Router() {
           <Route path="/about" component={About} />
           <Route path="/contact" component={Contact} />
           <Route path="/auth" component={AuthPage} />
+          <Route path="/search" component={Search} />
+          <Route path="/profile" component={<ProtectedRoute component={Profile} />} />
 
           {/* Protected Admin Routes */}
           <Route path="/admin">{() => (user ? <Admin /> : <AuthPage />)}</Route>

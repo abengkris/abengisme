@@ -71,6 +71,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API routes for blog
   const apiRouter = "/api";
 
+// Search endpoint
+app.get("/api/search", async (req: Request, res: Response) => {
+  const { q, category } = req.query;
+  try {
+    let query = db.select().from(posts);
+    
+    if (q) {
+      query = query.where(sql`title ILIKE ${`%${q}%`} OR content ILIKE ${`%${q}%`}`);
+    }
+    
+    if (category && category !== 'all') {
+      const categoryData = await db.select().from(categories).where(eq(categories.slug, category as string)).limit(1);
+      if (categoryData.length > 0) {
+        query = query.where(eq(posts.categoryId, categoryData[0].id));
+      }
+    }
+    
+    const results = await query.orderBy(desc(posts.createdAt)).limit(10);
+    res.json(results);
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).json({ message: "Failed to perform search" });
+  }
+});
+
   // Get all categories
   app.get(`${apiRouter}/categories`, async (_req: Request, res: Response) => {
     try {
