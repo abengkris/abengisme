@@ -78,7 +78,7 @@ function App() {
             <MobileBottomNav />
           </div>
           <Toaster />
-          <PageViewTracker />
+          {/* <PageViewTracker /> */}
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
