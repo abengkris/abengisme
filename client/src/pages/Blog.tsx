@@ -16,14 +16,14 @@ const Blog: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   const allPostsQuery = useAllPosts();
   const categoriesQuery = useAllCategories();
   const postsByCategoryQuery = usePostsByCategory(activeCategoryId);
-  
+
   // Determine which posts to display based on category selection
   const postsQuery = activeCategoryId ? postsByCategoryQuery : allPostsQuery;
-  
+
   // When posts or search query changes, filter and update the filtered posts
   useEffect(() => {
     if (postsQuery.data) {
@@ -38,29 +38,53 @@ const Blog: React.FC = () => {
       setCurrentPage(1); // Reset to first page on new search or category
     }
   }, [postsQuery.data, searchQuery]);
-  
+
   // Get category name by id
   const getCategoryName = (categoryId: number) => {
     if (!categoriesQuery.data) return '';
     const category = categoriesQuery.data.find(cat => cat.id === categoryId);
     return category?.name || '';
   };
-  
+
   // Calculate pagination
   const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
   const currentPosts = filteredPosts.slice(
     (currentPage - 1) * POSTS_PER_PAGE, 
     currentPage * POSTS_PER_PAGE
   );
-  
+
   // Handle category change
   const handleCategoryClick = (categoryId: number | null) => {
     setActiveCategoryId(categoryId);
     setSearchQuery('');
   };
-  
+
   // Loading state
   const isLoading = postsQuery.isLoading || categoriesQuery.isLoading;
+
+  const LoadingPosts = () => (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="bg-white rounded-lg overflow-hidden shadow-sm border border-neutral-200">
+          <Skeleton className="w-full h-48" />
+          <div className="p-5">
+            <div className="flex items-center mb-3">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-4 mx-2" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+            <Skeleton className="h-6 w-full mb-2" />
+            <Skeleton className="h-4 w-full mb-1" />
+            <Skeleton className="h-4 w-4/5 mb-4" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (isLoading) return <LoadingPosts />;
+
 
   return (
     <>
@@ -69,7 +93,7 @@ const Blog: React.FC = () => {
         description="Explore articles on design, technology, productivity, and mindful living."
         keywords="blog, articles, design, technology, mindfulness, productivity"
       />
-      
+
       <section className="py-12 md:py-16 mt-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">
@@ -80,7 +104,7 @@ const Blog: React.FC = () => {
                   Fresh perspectives on design, technology, and mindful living
                 </p>
               </div>
-              
+
               <div className="mt-4 md:mt-0">
                 <div className="relative">
                   <Input
@@ -98,7 +122,7 @@ const Blog: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Categories */}
             <div className="flex flex-wrap gap-2 mb-8">
               <CategoryButton
@@ -106,7 +130,7 @@ const Blog: React.FC = () => {
                 isActive={activeCategoryId === null}
                 onClick={() => handleCategoryClick(null)}
               />
-              
+
               {isLoading ? (
                 // Category skeletons
                 [...Array(4)].map((_, i) => (
@@ -123,29 +147,14 @@ const Blog: React.FC = () => {
                 ))
               )}
             </div>
-            
+
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Main content - Blog Post Grid */}
               <div className="lg:w-3/4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {isLoading ? (
                     // Post skeletons
-                    [...Array(6)].map((_, i) => (
-                      <div key={i} className="bg-white rounded-lg overflow-hidden shadow-sm border border-neutral-200">
-                        <Skeleton className="w-full h-48" />
-                        <div className="p-5">
-                          <div className="flex items-center mb-3">
-                            <Skeleton className="h-4 w-16" />
-                            <Skeleton className="h-4 w-4 mx-2" />
-                            <Skeleton className="h-4 w-24" />
-                          </div>
-                          <Skeleton className="h-6 w-full mb-2" />
-                          <Skeleton className="h-4 w-full mb-1" />
-                          <Skeleton className="h-4 w-4/5 mb-4" />
-                          <Skeleton className="h-3 w-24" />
-                        </div>
-                      </div>
-                    ))
+                    <LoadingPosts />
                   ) : filteredPosts.length > 0 ? (
                     currentPosts.map(post => (
                       <PostCard
@@ -166,7 +175,7 @@ const Blog: React.FC = () => {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Pagination */}
                 {!isLoading && totalPages > 1 && (
                   <div className="mt-12 flex justify-center">
@@ -178,7 +187,7 @@ const Blog: React.FC = () => {
                   </div>
                 )}
               </div>
-              
+
               {/* Sidebar */}
               <div className="lg:w-1/4 space-y-8">
                 {/* Ad in sidebar */}
@@ -186,7 +195,7 @@ const Blog: React.FC = () => {
                   <h3 className="text-lg font-semibold mb-4 font-serif">Sponsored</h3>
                   <AdContainer position="sidebar" />
                 </div>
-                
+
                 {/* Popular categories */}
                 <div className="rounded-lg overflow-hidden border border-neutral-100 p-4">
                   <h3 className="text-lg font-semibold mb-4 font-serif">Popular Categories</h3>

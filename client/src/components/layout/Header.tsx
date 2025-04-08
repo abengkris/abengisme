@@ -230,9 +230,9 @@ const Header: React.FC = () => {
         </div>
       </div>
       
-      <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`}>
+      <div className={`fixed inset-x-0 top-16 z-50 transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-y-0' : '-translate-y-full'} md:hidden`}>
         <div className="container mx-auto px-4 py-3">
-          <nav className="bg-card dark:bg-card/80 backdrop-blur-lg rounded-xl shadow-lg dark:shadow-accent/5 mt-2 overflow-hidden border border-border/30">
+          <nav className="bg-card/95 dark:bg-card/95 backdrop-blur-lg rounded-xl shadow-lg dark:shadow-accent/5 mt-2 overflow-hidden border border-border/30">
             <div className="flex flex-col py-2">
               <Link href="/" className={cn("flex items-center px-5 py-3 hover:bg-muted/50 dark:hover:bg-muted/10 transition-colors", isActive('/') ? 'text-accent font-medium' : 'text-foreground/80')}>
                 <Home className="w-5 h-5 mr-3" />
