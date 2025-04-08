@@ -41,13 +41,13 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json();
 }
 
-const BASE_URL =
-  process.env.NODE_ENV === "production" ? "" : "http://0.0.0.0:5000";
+// const BASE_URL =
+//  process.env.NODE_ENV === "production" ? "" : "http://0.0.0.0:5000";
 
 export const api = {
   get: async <T>(url: string): Promise<T> => {
     try {
-      const response = await fetch(`${BASE_URL}${url}`, {
+      const response = await fetch(`${url}`, {
         credentials: "include",
         headers: { Accept: "application/json" },
       });
@@ -60,7 +60,7 @@ export const api = {
 
   post: async <T>(url: string, data?: unknown): Promise<T> => {
     try {
-      const response = await fetch(`${BASE_URL}${url}`, {
+      const response = await fetch(`${url}`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -78,7 +78,7 @@ export const api = {
 
   put: async <T>(url: string, data: unknown): Promise<T> => {
     try {
-      const response = await fetch(`${BASE_URL}${url}`, {
+      const response = await fetch(`${url}`, {
         method: "PUT",
         credentials: "include",
         headers: {
@@ -96,7 +96,7 @@ export const api = {
 
   delete: async <T>(url: string): Promise<T> => {
     try {
-      const response = await fetch(`${BASE_URL}${url}`, {
+      const response = await fetch(`${url}`, {
         method: "DELETE",
         credentials: "include",
         headers: { Accept: "application/json" },
