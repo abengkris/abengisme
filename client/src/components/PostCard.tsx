@@ -25,7 +25,7 @@ const PostCard: React.FC<PostCardProps> = React.memo(
     createdAt,
   }) => {
     return (
-      <article className="relative group flex flex-col overflow-hidden transition-all duration-300 bg-card rounded-2xl shadow-sm hover:shadow-xl border border-border">
+      <article className="relative group flex flex-col overflow-hidden transition-all duration-300 bg-card rounded-2xl shadow-md hover:shadow-lg p-5 space-y-4"> {/* Applied the provided className change */}
         {/* Category Badge */}
         <div className="absolute top-4 left-4 z-10">
           <span className="inline-block px-3 py-1 bg-background/90 backdrop-blur-sm text-xs font-medium text-accent rounded-full shadow-sm">
