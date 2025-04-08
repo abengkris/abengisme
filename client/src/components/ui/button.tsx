@@ -39,7 +39,39 @@ export interface ButtonProps
   asChild?: boolean
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ 
+  className,
+  variant = "default",
+  size = "default",
+  asChild = false,
+  loading = false,
+  ...props
+}, ref) => {
+  const Comp = asChild ? Slot : "button";
+  const { triggerHaptic } = useFeedback();
+
+  return (
+    <Comp
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        loading && "opacity-50 cursor-not-allowed"
+      )}
+      ref={ref}
+      onClick={(e) => {
+        triggerHaptic();
+        props.onClick?.(e);
+      }}
+      disabled={loading || props.disabled}
+      aria-busy={loading}
+      {...props}
+    >
+      {loading && (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      )}
+      {props.children}
+    </Comp>
+  );
+}
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     return (
