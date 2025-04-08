@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -8,7 +8,6 @@ import Home from "@/pages/Home";
 import Blog from "@/pages/Blog";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
-import React from "react";
 const SinglePost = React.lazy(() => import("@/pages/SinglePost"));
 const Admin = React.lazy(() => import("@/pages/Admin"));
 const AdminNewPost = React.lazy(() => import("@/pages/AdminNewPost"));
