@@ -169,8 +169,8 @@ const Header: React.FC = () => {
           <div className="flex items-center md:hidden">
             {user ? (
               <DropdownMenu>
-                <DropdownMenuTrigger className="mr-2">
-                  <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center">
+                <DropdownMenuTrigger className="mr-2" aria-label="User menu">
+                  <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center hover:bg-accent/30 transition-colors">
                     <User className="w-5 h-5 text-accent" />
                   </div>
                 </DropdownMenuTrigger>
@@ -220,17 +220,23 @@ const Header: React.FC = () => {
 
             <button
               onClick={toggleMobileMenu}
-              className="flex items-center justify-center w-9 h-9 rounded-xl hover:bg-muted/80 dark:hover:bg-muted/10 transition-all"
-              aria-label="Toggle menu"
+              className="flex items-center justify-center w-9 h-9 rounded-xl hover:bg-muted/80 dark:hover:bg-muted/10 transition-colors"
+              aria-label="Toggle mobile menu"
               aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className={cn("w-5 h-5 transition-transform", mobileMenuOpen && "transform rotate-90")} />
             </button>
           </div>
         </div>
       </div>
       
-      <div className={`fixed inset-x-0 top-16 z-50 transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-y-0' : '-translate-y-full'} md:hidden`}>
+      <div 
+        id="mobile-menu"
+        role="navigation"
+        aria-label="Mobile navigation"
+        className={`fixed inset-x-0 top-16 z-50 transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-y-0' : '-translate-y-full'} md:hidden`}
+      >
         <div className="container mx-auto px-4 py-3">
           <nav className="bg-card/95 dark:bg-card/95 backdrop-blur-lg rounded-xl shadow-lg dark:shadow-accent/5 mt-2 overflow-hidden border border-border/30">
             <div className="flex flex-col py-2">
