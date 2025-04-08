@@ -172,7 +172,7 @@ const SinglePost: React.FC = () => {
 
       <div className="pt-24 pb-16 md:pt-32 md:pb-0">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto prose-headings:font-serif prose-headings:font-bold prose-p:leading-relaxed">
             {/* Back button and Breadcrumbs */}
             <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <Button
@@ -226,9 +226,14 @@ const SinglePost: React.FC = () => {
             ) : postQuery.data ? (
               <>
                 {/* Post Header */}
-                <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-                  {postQuery.data.title}
-                </h1>
+                <header className="mb-12">
+                  <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
+                    {postQuery.data.title}
+                  </h1>
+                  <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+                    {postQuery.data.excerpt}
+                  </p>
+                </header>
 
                 {/* Post Meta */}
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
