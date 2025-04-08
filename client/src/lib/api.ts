@@ -42,7 +42,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 const BASE_URL =
-  process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
+  process.env.NODE_ENV === "production" ? "" : "http://0.0.0.0:5000";
 
 export const api = {
   get: async <T>(url: string): Promise<T> => {
