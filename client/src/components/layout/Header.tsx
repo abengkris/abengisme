@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/hooks/use-auth';
@@ -8,7 +9,7 @@ import {
   User, 
   LogIn, 
   LogOut, 
-  UserCheck, 
+  UserCheck,
   ChevronDown,
   Home,
   BookOpen,
@@ -32,17 +33,14 @@ const Header: React.FC = () => {
   const [location] = useLocation();
   const { user, isPremium, loginMutation, logoutMutation } = useAuth();
   
-  // Use the scroll effect hook for header visibility
   const { visible } = useScrollEffect({
     hideOnScrollDown: true,
     threshold: 50,
     alwaysShowAtTop: true
   });
   
-  // Also track if we've scrolled down at all for styling
   const [scrolled, setScrolled] = useState(false);
   
-  // Track scroll position for styling changes
   const handleScroll = () => {
     const isScrolled = window.scrollY > 10;
     if (isScrolled !== scrolled) {
@@ -50,7 +48,6 @@ const Header: React.FC = () => {
     }
   };
   
-  // Add scroll event listener
   React.useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => {
@@ -67,61 +64,63 @@ const Header: React.FC = () => {
     return location.startsWith(path);
   };
 
-  // Floating island styling based on scroll state
   const headerClasses = cn(
-    "fixed left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl backdrop-blur-md z-50 rounded-full transition-all duration-300 ease-in-out",
+    "fixed left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl z-50 rounded-2xl transition-all duration-300 ease-in-out",
     scrolled 
-      ? "bg-background/95 dark:bg-background/95 shadow-lg dark:shadow-black/10" 
-      : "bg-background/90 dark:bg-background/80 backdrop-blur-sm border border-border/50 dark:border-border/30",
+      ? "bg-background/95 dark:bg-background/95 shadow-xl dark:shadow-accent/5 backdrop-blur-xl" 
+      : "bg-background/80 dark:bg-background/70 backdrop-blur-md border border-border/30 dark:border-border/20",
     visible ? "top-5 translate-y-0" : "-top-20 translate-y-0"
+  );
+
+  const navLinkClasses = (isActivePath: boolean) => cn(
+    "nav-link flex items-center px-4 py-2.5 rounded-xl transition-all",
+    "hover:bg-muted/80 dark:hover:bg-muted/10",
+    "text-sm font-medium",
+    isActivePath ? "text-accent bg-accent/10 dark:bg-accent/20" : "text-foreground/80"
   );
 
   return (
     <header className={headerClasses}>
-      <div className="container mx-auto px-4 sm:px-8">
+      <div className="container mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <span className="font-serif text-xl sm:text-2xl font-bold bg-gradient-to-r from-accent to-accent/70 text-transparent bg-clip-text">
-              Mindful<span className="text-primary">Thoughts</span>
+          <Link href="/" className="flex items-center group">
+            <span className="font-serif text-2xl sm:text-3xl font-bold">
+              Mindful<span className="bg-gradient-to-r from-accent to-accent/70 bg-clip-text text-transparent group-hover:to-accent transition-all">Thoughts</span>
             </span>
           </Link>
           
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-2">
-            <Link href="/" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all ${isActive('/') ? 'text-accent font-medium' : 'text-primary'}`}>
-              <Home className="w-4 h-4 mr-1" />
+          <nav className="hidden md:flex items-center space-x-3">
+            <Link href="/" className={navLinkClasses(isActive('/'))}>
+              <Home className="w-4 h-4 mr-2" />
               Home
             </Link>
-            <Link href="/blog" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all ${isActive('/blog') ? 'text-accent font-medium' : 'text-primary'}`}>
-              <BookOpen className="w-4 h-4 mr-1" />
+            <Link href="/blog" className={navLinkClasses(isActive('/blog'))}>
+              <BookOpen className="w-4 h-4 mr-2" />
               Blog
             </Link>
-            <Link href="/about" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all ${isActive('/about') ? 'text-accent font-medium' : 'text-primary'}`}>
-              <Info className="w-4 h-4 mr-1" />
+            <Link href="/about" className={navLinkClasses(isActive('/about'))}>
+              <Info className="w-4 h-4 mr-2" />
               About
             </Link>
-            <Link href="/contact" className={`nav-link flex items-center px-4 py-2 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all ${isActive('/contact') ? 'text-accent font-medium' : 'text-primary'}`}>
-              <MessageSquare className="w-4 h-4 mr-1" />
+            <Link href="/contact" className={navLinkClasses(isActive('/contact'))}>
+              <MessageSquare className="w-4 h-4 mr-2" />
               Contact
             </Link>
 
-            {/* Divider */}
-            <div className="h-8 w-px bg-border dark:bg-border/50 mx-1"></div>
+            <div className="h-8 w-px bg-border/50 dark:bg-border/30 mx-2"></div>
 
-            {/* Auth Section */}
             {user ? (
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center px-4 py-2 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all">
+                <DropdownMenuTrigger className="flex items-center px-4 py-2 rounded-xl hover:bg-muted/80 dark:hover:bg-muted/10 transition-all">
                   <div className="flex items-center text-sm font-medium">
-                    <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center mr-2">
+                    <div className="w-8 h-8 rounded-xl bg-accent/20 flex items-center justify-center mr-2">
                       <User className="w-4 h-4 text-accent" />
                     </div>
                     <span className="hidden sm:inline">{user.username}</span>
-                    <ChevronDown className="h-4 w-4 ml-1" />
+                    <ChevronDown className="h-4 w-4 ml-1 opacity-50" />
                   </div>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 mt-2" sideOffset={20} forceMount>
+                <DropdownMenuContent align="end" className="w-48 mt-2" sideOffset={20}>
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
@@ -160,24 +159,22 @@ const Header: React.FC = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/auth" className="flex items-center px-5 py-2 bg-accent hover:bg-accent/90 text-white rounded-full transition-all">
+              <Link href="/auth" className="flex items-center px-5 py-2.5 bg-accent hover:bg-accent/90 text-white rounded-xl transition-all">
                 <LogIn className="w-4 h-4 mr-2" />
                 Sign In
               </Link>
             )}
           </nav>
           
-          {/* Mobile Navigation Toggle */}
           <div className="flex items-center md:hidden">
-            {/* Auth button for mobile */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger className="mr-2">
-                  <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center">
                     <User className="w-5 h-5 text-accent" />
                   </div>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="mt-2" sideOffset={20} forceMount>
+                <DropdownMenuContent align="end" className="mt-2" sideOffset={20}>
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
@@ -210,20 +207,20 @@ const Header: React.FC = () => {
                   
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
-                    <LogOut className="w-4 h-4 mr-2" /> 
+                    <LogOut className="w-4 h-4 mr-2" />
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/auth" className="mr-2 flex items-center justify-center w-9 h-9 bg-accent text-white rounded-full">
+              <Link href="/auth" className="mr-2 flex items-center justify-center w-9 h-9 bg-accent text-white rounded-xl">
                 <LogIn className="w-5 h-5" />
               </Link>
             )}
 
             <button
               onClick={toggleMobileMenu}
-              className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 transition-all"
+              className="flex items-center justify-center w-9 h-9 rounded-xl hover:bg-muted/80 dark:hover:bg-muted/10 transition-all"
               aria-label="Toggle menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -233,38 +230,36 @@ const Header: React.FC = () => {
         </div>
       </div>
       
-      {/* Mobile Navigation Menu */}
       <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`}>
         <div className="container mx-auto px-4 py-3">
-          <nav className="bg-card dark:bg-card rounded-2xl shadow-lg dark:shadow-black/10 mt-2 overflow-hidden">
+          <nav className="bg-card dark:bg-card/80 backdrop-blur-lg rounded-xl shadow-lg dark:shadow-accent/5 mt-2 overflow-hidden border border-border/30">
             <div className="flex flex-col py-2">
-              <Link href="/" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/') ? 'text-accent font-medium' : 'text-primary'}`}>
+              <Link href="/" className={cn("flex items-center px-5 py-3 hover:bg-muted/50 dark:hover:bg-muted/10 transition-colors", isActive('/') ? 'text-accent font-medium' : 'text-foreground/80')}>
                 <Home className="w-5 h-5 mr-3" />
                 Home
               </Link>
-              <Link href="/blog" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/blog') ? 'text-accent font-medium' : 'text-primary'}`}>
+              <Link href="/blog" className={cn("flex items-center px-5 py-3 hover:bg-muted/50 dark:hover:bg-muted/10 transition-colors", isActive('/blog') ? 'text-accent font-medium' : 'text-foreground/80')}>
                 <BookOpen className="w-5 h-5 mr-3" />
                 Blog
               </Link>
-              <Link href="/about" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/about') ? 'text-accent font-medium' : 'text-primary'}`}>
+              <Link href="/about" className={cn("flex items-center px-5 py-3 hover:bg-muted/50 dark:hover:bg-muted/10 transition-colors", isActive('/about') ? 'text-accent font-medium' : 'text-foreground/80')}>
                 <Info className="w-5 h-5 mr-3" />
                 About
               </Link>
-              <Link href="/contact" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/contact') ? 'text-accent font-medium' : 'text-primary'}`}>
+              <Link href="/contact" className={cn("flex items-center px-5 py-3 hover:bg-muted/50 dark:hover:bg-muted/10 transition-colors", isActive('/contact') ? 'text-accent font-medium' : 'text-foreground/80')}>
                 <MessageSquare className="w-5 h-5 mr-3" />
                 Contact
               </Link>
               
-              {/* Admin links in mobile menu */}
               {user && user.role === 'admin' && (
                 <>
-                  <div className="h-px bg-border dark:bg-border/50 mx-5 my-2" />
+                  <div className="h-px bg-border/30 dark:bg-border/20 mx-5 my-2" />
                   <h4 className="text-xs uppercase text-muted-foreground px-6 pt-2 pb-1">Admin</h4>
-                  <Link href="/admin" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/admin') && !isActive('/admin/analytics') ? 'text-accent font-medium' : 'text-primary'}`}>
+                  <Link href="/admin" className={cn("flex items-center px-5 py-3 hover:bg-muted/50 dark:hover:bg-muted/10 transition-colors", isActive('/admin') && !isActive('/admin/analytics') ? 'text-accent font-medium' : 'text-foreground/80')}>
                     <LayoutDashboard className="w-5 h-5 mr-3" />
                     Dashboard
                   </Link>
-                  <Link href="/admin/analytics" className={`flex items-center px-6 py-3 hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors ${isActive('/admin/analytics') ? 'text-accent font-medium' : 'text-primary'}`}>
+                  <Link href="/admin/analytics" className={cn("flex items-center px-5 py-3 hover:bg-muted/50 dark:hover:bg-muted/10 transition-colors", isActive('/admin/analytics') ? 'text-accent font-medium' : 'text-foreground/80')}>
                     <BarChart className="w-5 h-5 mr-3" />
                     Analytics
                   </Link>
