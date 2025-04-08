@@ -1,4 +1,3 @@
-
 import React, { Suspense } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
@@ -17,6 +16,7 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 import AdSenseScript from "@/components/ads/AdSenseScript";
 import { AuthProvider } from "@/hooks/use-auth";
 import { useAuth } from "@/hooks/use-auth";
+import PageViewTracker from "@/components/analytics/PageViewTracker";
 
 const SinglePost = React.lazy(() => import("@/pages/SinglePost"));
 const Admin = React.lazy(() => import("@/pages/Admin"));
@@ -47,7 +47,9 @@ function Router() {
             {() => (user ? <AdminEditPost /> : <AuthPage />)}
           </Route>
           <Route path="/admin/analytics">
-            {() => (user && user.role === "admin" ? <Analytics /> : <AuthPage />)}
+            {() =>
+              user && user.role === "admin" ? <Analytics /> : <AuthPage />
+            }
           </Route>
 
           <Route component={NotFound} />
@@ -76,6 +78,7 @@ function App() {
             <MobileBottomNav />
           </div>
           <Toaster />
+          <PageViewTracker />
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
