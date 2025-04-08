@@ -24,7 +24,7 @@ export const PageViewTracker = () => {
   const [location] = useLocation();
   const [entryTime] = useState<Date>(new Date());
   const [isFirstView, setIsFirstView] = useState<boolean>(true);
-  
+
   // Page view tracking mutation
   const pageViewMutation = useMutation({
     mutationFn: recordPageView,
@@ -33,7 +33,7 @@ export const PageViewTracker = () => {
       // Silent error - don't show toast to users as this is background tracking
     }
   });
-  
+
   // Get screen and viewport data
   const getViewportData = () => {
     return {
@@ -44,21 +44,21 @@ export const PageViewTracker = () => {
       devicePixelRatio: window.devicePixelRatio || 1,
     };
   };
-  
+
   // Get page performance data
   const getPerformanceData = () => {
     const perfData: any = {};
-    
+
     if (window.performance && window.performance.timing) {
       const timing = window.performance.timing;
       perfData.loadTime = timing.loadEventEnd - timing.navigationStart;
       perfData.domReady = timing.domComplete - timing.domLoading;
       perfData.ttfb = timing.responseStart - timing.navigationStart;
     }
-    
+
     return perfData;
   };
-  
+
   // Track page view on location change
   useEffect(() => {
     const trackPageView = async () => {
@@ -66,21 +66,21 @@ export const PageViewTracker = () => {
         // Calculate time spent on previous page if this isn't the first view
         const timespentMS = isFirstView ? 0 : new Date().getTime() - entryTime.getTime();
         const timeSpentSeconds = Math.floor(timespentMS / 1000);
-        
+
         // Mark that we've tracked at least one view
         if (isFirstView) {
           setIsFirstView(false);
         }
-        
+
         // Get page title and canonical URL
         const pageTitle = document.title;
         const canonicalElement = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
         const canonicalUrl = canonicalElement ? canonicalElement.href : '';
-        
+
         // Collect viewport and performance data
         const viewportData = getViewportData();
         const performanceData = getPerformanceData();
-        
+
         // Track the page view with all collected data
         await pageViewMutation.mutateAsync({
           path: location,
@@ -99,23 +99,26 @@ export const PageViewTracker = () => {
           }),
           // The server will set viewedAt, country, city, browser and device
         });
-        
+
         // Store entry point for first-time visitors
         if (isFirstView && typeof sessionStorage !== 'undefined') {
           sessionStorage.setItem('entry_point', location);
         }
       } catch (error) {
-        // Error already handled in onError
+        // Silently fail analytics in development
+        if (process.env.NODE_ENV === 'production') {
+          console.error('Failed to track page view:', error);
+        }
       }
     };
-    
+
     trackPageView();
-    
+
     // Register additional engagement metrics
     const handleBeforeUnload = () => {
       // When user is leaving page, try to send final engagement time
       const timeSpent = Math.floor((new Date().getTime() - entryTime.getTime()) / 1000);
-      
+
       // Use sendBeacon if available for more reliable data collection on page exit
       if (navigator.sendBeacon) {
         const data = {
@@ -126,14 +129,14 @@ export const PageViewTracker = () => {
         navigator.sendBeacon('/api/analytics/engagement', JSON.stringify(data));
       }
     };
-    
+
     window.addEventListener('beforeunload', handleBeforeUnload);
-    
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [location, pageViewMutation, isFirstView, entryTime]);
-  
+
   // Component doesn't render anything
   return null;
 };

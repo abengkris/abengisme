@@ -12,6 +12,7 @@ interface PostCardProps {
   categoryName: string;
   readTime: number;
   createdAt: Date;
+  error?: any; // Added error prop for error handling
 }
 
 const PostCard: React.FC<PostCardProps> = React.memo(
@@ -23,9 +24,10 @@ const PostCard: React.FC<PostCardProps> = React.memo(
     categoryName,
     readTime,
     createdAt,
+    error,
   }) => {
     return (
-      <article className="relative group flex flex-col overflow-hidden transition-all duration-300 bg-card rounded-2xl shadow-md hover:shadow-lg p-5 space-y-4"> {/* Applied the provided className change */}
+      <article className="relative group flex flex-col overflow-hidden transition-all duration-300 bg-card rounded-2xl shadow-md hover:shadow-lg p-5 space-y-4 border border-border/50"> {/* Applied the provided className change and added border */}
         {/* Category Badge */}
         <div className="absolute top-4 left-4 z-10">
           <span className="inline-block px-3 py-1 bg-background/90 backdrop-blur-sm text-xs font-medium text-accent rounded-full shadow-sm">
@@ -63,6 +65,11 @@ const PostCard: React.FC<PostCardProps> = React.memo(
           <p className="text-muted-foreground mb-5 text-sm line-clamp-2 flex-grow">
             {excerpt}
           </p>
+
+          {/* Error Handling */}
+          {error && (
+            <p className="text-red-500 text-sm">Error loading data: {error.message}</p>
+          )}
 
           {/* Footer Metadata */}
           <div className="flex items-center justify-between pt-4 border-t border-border text-xs text-muted-foreground">
