@@ -1,12 +1,12 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
 import { updatePost, deletePost, useAllCategories } from '@/lib/api';
-import { useQuery } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -43,7 +43,6 @@ import {
 import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Create a schema for the post form
 const postFormSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   slug: z.string().min(3, 'Slug must be at least 3 characters').regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens'),
@@ -51,7 +50,7 @@ const postFormSchema = z.object({
   content: z.string().min(50, 'Content must be at least 50 characters'),
   featuredImage: z.string().url('Must be a valid URL'),
   categoryId: z.coerce.number().min(1, 'Please select a category'),
-  authorId: z.coerce.number().default(1), // Default to author ID 1
+  authorId: z.coerce.number().default(1),
   readTime: z.coerce.number().min(1, 'Read time must be at least 1 minute'),
   isFeatured: z.boolean().default(false),
   published: z.boolean().default(true),
@@ -66,10 +65,8 @@ const AdminEditPost: React.FC = () => {
   const categoriesQuery = useAllCategories();
   const [isPreview, setIsPreview] = useState(false);
   
-  // Convert ID to number
   const postId = id ? parseInt(id) : 0;
   
-  // Fetch post data using React Query
   const postQuery = useQuery({
     queryKey: ['post', postId],
     queryFn: async () => {
@@ -80,9 +77,9 @@ const AdminEditPost: React.FC = () => {
       return response.json();
     },
     enabled: !!postId,
+    suspense: false,
   });
   
-  // Set up form
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postFormSchema),
     defaultValues: {
@@ -99,7 +96,6 @@ const AdminEditPost: React.FC = () => {
     },
   });
   
-  // When post data is loaded, populate the form
   useEffect(() => {
     if (postQuery.data) {
       form.reset({
@@ -117,7 +113,6 @@ const AdminEditPost: React.FC = () => {
     }
   }, [postQuery.data, form]);
 
-  // Show error state
   useEffect(() => {
     if (postQuery.error) {
       toast({
@@ -129,7 +124,6 @@ const AdminEditPost: React.FC = () => {
     }
   }, [postQuery.error, toast, navigate]);
   
-  // Handle form submission
   const updateMutation = useMutation({
     mutationFn: (data: PostFormValues) => updatePost(postId, data),
     onSuccess: () => {
@@ -149,7 +143,6 @@ const AdminEditPost: React.FC = () => {
     },
   });
   
-  // Handle delete
   const deleteMutation = useMutation({
     mutationFn: () => deletePost(postId),
     onSuccess: () => {
@@ -177,13 +170,38 @@ const AdminEditPost: React.FC = () => {
     deleteMutation.mutate();
   };
   
-  const isLoading = form.formState.isSubmitting || updateMutation.isPending || deleteMutation.isPending;
+  const isLoading = postQuery.isLoading || form.formState.isSubmitting || updateMutation.isPending || deleteMutation.isPending;
   
+  if (postQuery.isLoading) {
+    return (
+      <div className="py-12 md:py-16 mt-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-5xl mx-auto">
+            <Skeleton className="h-8 w-32 mb-4" />
+            <Skeleton className="h-12 w-64 mb-8" />
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-24" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-32 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="py-12 md:py-16 mt-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
-          {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
               <Button 
@@ -236,7 +254,6 @@ const AdminEditPost: React.FC = () => {
             </div>
           </div>
           
-          {/* Post Form */}
           <Card>
             <CardHeader>
               <CardTitle>Post Details</CardTitle>
@@ -244,7 +261,6 @@ const AdminEditPost: React.FC = () => {
             <CardContent>
               <Form {...form}>
                 <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-                  {/* Title */}
                   <FormField
                     control={form.control}
                     name="title"
@@ -259,7 +275,6 @@ const AdminEditPost: React.FC = () => {
                     )}
                   />
                   
-                  {/* Slug */}
                   <FormField
                     control={form.control}
                     name="slug"
@@ -274,7 +289,6 @@ const AdminEditPost: React.FC = () => {
                     )}
                   />
                   
-                  {/* Category */}
                   <FormField
                     control={form.control}
                     name="categoryId"
@@ -311,7 +325,6 @@ const AdminEditPost: React.FC = () => {
                     )}
                   />
                   
-                  {/* Featured Image */}
                   <FormField
                     control={form.control}
                     name="featuredImage"
@@ -326,7 +339,6 @@ const AdminEditPost: React.FC = () => {
                     )}
                   />
                   
-                  {/* Reading Time */}
                   <FormField
                     control={form.control}
                     name="readTime"
@@ -341,7 +353,6 @@ const AdminEditPost: React.FC = () => {
                     )}
                   />
                   
-                  {/* Excerpt */}
                   <FormField
                     control={form.control}
                     name="excerpt"
@@ -360,7 +371,6 @@ const AdminEditPost: React.FC = () => {
                     )}
                   />
                   
-                  {/* Content */}
                   <FormField
                     control={form.control}
                     name="content"
@@ -407,7 +417,6 @@ const AdminEditPost: React.FC = () => {
                     )}
                   />
                   
-                  {/* Featured Post */}
                   <FormField
                     control={form.control}
                     name="isFeatured"
@@ -426,7 +435,6 @@ const AdminEditPost: React.FC = () => {
                     )}
                   />
                   
-                  {/* Published */}
                   <FormField
                     control={form.control}
                     name="published"
