@@ -39,10 +39,12 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json();
 }
 
+const BASE_URL = import.meta.env.DEV ? 'http://localhost:5000' : '';
+
 export const api = {
   get: async <T>(url: string): Promise<T> => {
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${BASE_URL}${url}`, {
         credentials: "include",
         headers: {
           Accept: "application/json",
@@ -57,7 +59,7 @@ export const api = {
 
   post: async <T>(url: string, data?: unknown): Promise<T> => {
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${BASE_URL}${url}`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -75,7 +77,7 @@ export const api = {
 
   put: async <T>(url: string, data: unknown): Promise<T> => {
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${BASE_URL}${url}`, {
         method: "PUT",
         credentials: "include",
         headers: {
@@ -93,7 +95,7 @@ export const api = {
 
   delete: async <T>(url: string): Promise<T> => {
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${BASE_URL}${url}`, {
         method: "DELETE",
         credentials: "include",
         headers: {
