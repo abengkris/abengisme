@@ -1,5 +1,5 @@
 
-# Mindful Thoughts Blog
+# Abengisme
 
 A modern, full-stack blog platform built with React, Express, and TypeScript, featuring a minimalist design focused on content and user experience.
 
